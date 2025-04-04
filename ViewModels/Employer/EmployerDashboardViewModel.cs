@@ -8,6 +8,7 @@ namespace TVOnline.ViewModels.Employer
         public int TotalApplications { get; set; }
         public List<RecentApplicationViewModel> RecentApplications { get; set; }
         public ApplicationStatisticsViewModel ApplicationStatistics { get; set; }
+        public List<TVOnline.Models.Users> FeaturedUserCVs { get; set; }
     }
 
     public class CompanyInfoViewModel

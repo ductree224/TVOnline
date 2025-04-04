@@ -41,6 +41,11 @@
                                 </button>
                             </li>
                             <li class="nav-item" role="presentation">
+                                <button class="nav-link d-flex align-items-center" id="cv-tab" data-bs-toggle="tab" data-bs-target="#cv" type="button" role="tab">
+                                    <i class="bi bi-file-earmark-text-fill me-2"></i> CV & Hồ sơ
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
                                 <button class="nav-link d-flex align-items-center" id="password-tab" data-bs-toggle="tab" data-bs-target="#password" type="button" role="tab">
                                     <i class="bi bi-key-fill me-2"></i> @(hasPassword ? "Đổi mật khẩu" : "Tạo mật khẩu")
                                 </button>
@@ -59,7 +64,7 @@
                                     </div>
                                 </div>
                                 
-                                <form asp-action="UpdateProfile" method="post">
+                                <form asp-action="UpdateProfile" method="post" enctype="multipart/form-data">
                                     <input type="hidden" id="Id" asp-for="Id" />
                                     <div class="row g-4">
                                         <div class="col-md-6">
@@ -92,6 +97,98 @@
                                             </div>
                                         </div>
                                     </div>
+                                    <div class="text-center mt-4">
+                                        <button type="submit" class="btn btn-primary px-5 py-2">
+                                            <i class="bi bi-save me-2"></i> Lưu thông tin
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <!-- Tab CV & Hồ sơ -->
+                            <div class="tab-pane fade" id="cv" role="tabpanel" aria-labelledby="cv-tab">
+                                <div class="alert alert-info rounded-3 mb-4">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-info-circle-fill fs-4 me-3"></i>
+                                        <div>
+                                            <h5 class="alert-heading mb-1">Hồ sơ chuyên nghiệp giúp tăng cơ hội ứng tuyển</h5>
+                                            <p class="mb-0 small">Cập nhật CV và thông tin chi tiết về bản thân để nhà tuyển dụng có thể đánh giá tốt hơn về năng lực của bạn</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <form asp-action="UpdateProfile" method="post" enctype="multipart/form-data">
+                                    <input type="hidden" asp-for="Id" />
+                                    <input type="hidden" asp-for="Name" />
+                                    <input type="hidden" asp-for="Email" />
+                                    <input type="hidden" asp-for="PhoneNumber" />
+                                    <input type="hidden" asp-for="City" />
+                                    <input type="hidden" asp-for="Job" />
+                                    <input type="hidden" asp-for="Dob" />
+                                    
+                                    <!-- CV Upload Section -->
+                                    <div class="card mb-4 border-0 shadow-sm rounded-3">
+                                        <div class="card-header bg-light py-3">
+                                            <h5 class="mb-0"><i class="bi bi-file-earmark-pdf me-2"></i>CV của bạn</h5>
+                                        </div>
+                                        <div class="card-body p-4">
+                                            @if (!string.IsNullOrEmpty(Model.CurrentCvUrl))
+                                            {
+                                                <div class="d-flex align-items-center mb-3">
+                                                    <div class="cv-file-icon me-3">
+                                                        <i class="bi bi-file-earmark-pdf-fill text-danger fs-1"></i>
+                                                    </div>
+                                                    <div class="cv-file-info flex-grow-1">
+                                                        <h6 class="mb-1">@Model.CurrentCvUrl</h6>
+                                                        <p class="text-muted small mb-0">
+                                                            Đã tải lên: @DateTime.Now.ToString("dd/MM/yyyy HH:mm")
+                                                        </p>
+                                                    </div>
+                                                    <div class="cv-file-actions">
+                                                        <a asp-action="DownloadCV" class="btn btn-sm btn-outline-primary me-2">
+                                                            <i class="bi bi-download me-1"></i> Tải xuống
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            }
+                                            
+                                            <div class="cv-upload mt-3">
+                                                <label asp-for="CvFile" class="form-label">Tải lên CV mới</label>
+                                                <input asp-for="CvFile" class="form-control" type="file" accept=".pdf,.doc,.docx" />
+                                                <div class="form-text">Định dạng hỗ trợ: PDF, DOC, DOCX (tối đa 5MB)</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Biography Section -->
+                                    <div class="card mb-4 border-0 shadow-sm rounded-3">
+                                        <div class="card-header bg-light py-3">
+                                            <h5 class="mb-0"><i class="bi bi-person-lines-fill me-2"></i>Thông tin chi tiết</h5>
+                                        </div>
+                                        <div class="card-body p-4">
+                                            <div class="mb-3">
+                                                <label asp-for="Biography" class="form-label">Giới thiệu bản thân</label>
+                                                <textarea asp-for="Biography" class="form-control" rows="4" placeholder="Viết giới thiệu ngắn gọn về bản thân, mục tiêu nghề nghiệp và điểm mạnh của bạn"></textarea>
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <label asp-for="Skills" class="form-label">Kỹ năng</label>
+                                                <textarea asp-for="Skills" class="form-control" rows="3" placeholder="Liệt kê các kỹ năng chuyên môn và kỹ năng mềm của bạn, phân cách bằng dấu phẩy"></textarea>
+                                                <div class="form-text">Ví dụ: Java, Python, SQL, Tiếng Anh, Làm việc nhóm, Quản lý thời gian</div>
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <label asp-for="WorkExperience" class="form-label">Kinh nghiệm làm việc</label>
+                                                <textarea asp-for="WorkExperience" class="form-control" rows="4" placeholder="Mô tả kinh nghiệm làm việc của bạn, bao gồm tên công ty, vị trí, thời gian và trách nhiệm chính"></textarea>
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <label asp-for="Education" class="form-label">Học vấn</label>
+                                                <textarea asp-for="Education" class="form-control" rows="3" placeholder="Liệt kê thông tin về trình độ học vấn, bao gồm tên trường, chuyên ngành, thời gian học và bằng cấp"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
                                     <div class="text-center mt-4">
                                         <button type="submit" class="btn btn-primary px-5 py-2">
                                             <i class="bi bi-save me-2"></i> Lưu thông tin
@@ -138,18 +235,18 @@
                                                 </div>
                                             </div>
                                             <div class="form-floating mb-4">
-                                                <input type="password" id="confirmPassword" name="ConfirmNewPassword" class="form-control" 
-                                                       placeholder="Xác nhận @(hasPassword ? "mật khẩu mới" : "mật khẩu")" required />
-                                                <label for="confirmPassword">Xác nhận @(hasPassword ? "mật khẩu mới" : "mật khẩu")</label>
+                                                <input type="password" id="confirmNewPassword" name="ConfirmNewPassword" class="form-control" 
+                                                       placeholder="Xác nhận mật khẩu" required minlength="6" />
+                                                <label for="confirmNewPassword">Xác nhận mật khẩu</label>
                                                 <div class="password-toggle position-absolute top-50 end-0 translate-middle-y me-3">
-                                                    <a href="javascript:void(0)" onclick="togglePassword('confirmPassword', 'confirmPasswordIcon')">
-                                                        <i id="confirmPasswordIcon" class="bi bi-eye-slash"></i>
+                                                    <a href="javascript:void(0)" onclick="togglePassword('confirmNewPassword', 'confirmNewPasswordIcon')">
+                                                        <i id="confirmNewPasswordIcon" class="bi bi-eye-slash"></i>
                                                     </a>
                                                 </div>
                                             </div>
                                             <div class="text-center mt-4">
                                                 <button type="submit" class="btn btn-primary px-5 py-2">
-                                                    <i class="bi bi-key me-2"></i> @(hasPassword ? "Đổi mật khẩu" : "Tạo mật khẩu")
+                                                    <i class="bi bi-shield-lock-fill me-2"></i> @(hasPassword ? "Đổi mật khẩu" : "Tạo mật khẩu")
                                                 </button>
                                             </div>
                                         </div>
@@ -165,50 +262,32 @@
 </section>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
     <script>
+        // Function to toggle password visibility
         function togglePassword(inputId, iconId) {
-            var passwordField = document.getElementById(inputId);
-            var toggleIcon = document.getElementById(iconId);
-            if (passwordField.type === "password") {
-                passwordField.type = "text";
-                toggleIcon.classList.remove("bi-eye-slash");
-                toggleIcon.classList.add("bi-eye");
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.replace("bi-eye-slash", "bi-eye");
             } else {
-                passwordField.type = "password";
-                toggleIcon.classList.remove("bi-eye");
-                toggleIcon.classList.add("bi-eye-slash");
+                input.type = "password";
+                icon.classList.replace("bi-eye", "bi-eye-slash");
             }
         }
-
-        // Nếu có lỗi liên quan đến mật khẩu, chuyển sang tab mật khẩu
-        if (window.location.search.includes('error')) {
-            document.querySelector('#password-tab').click();
-        }
+        
+        // Auto-select tab based on hash in URL
+        document.addEventListener('DOMContentLoaded', function() {
+            const hash = window.location.hash;
+            if (hash) {
+                const tabId = hash.replace('#', '');
+                const tab = document.querySelector(`#profileTabs button[data-bs-target="#${tabId}"]`);
+                if (tab) {
+                    const bsTab = new bootstrap.Tab(tab);
+                    bsTab.show();
+                }
+            }
+        });
     </script>
-    
-    <style>
-        .profile-tabs .nav-link {
-            color: var(--text-color);
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-bottom: 2px solid transparent;
-        }
-        
-        .profile-tabs .nav-link.active {
-            color: var(--primary-color);
-            background-color: transparent;
-            border-bottom: 2px solid var(--primary-color);
-        }
-        
-        .password-toggle {
-            z-index: 5;
-        }
-        
-        .form-floating > .form-control:focus ~ label {
-            color: var(--primary-color);
-        }
-    </style>
 }

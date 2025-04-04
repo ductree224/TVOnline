@@ -7,5 +7,6 @@ namespace TVOnline.ViewModels.Post
     {
         public PostResponse Post { get; set; }
         public Users? CurrentUser { get; set; }
+        public bool IsEmployerOfPost { get; set; }
     }
 }

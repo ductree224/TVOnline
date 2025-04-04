@@ -133,6 +133,18 @@
                             </div>
                         </div>
                     }
+                    else if (Model.IsEmployerOfPost)
+                    {
+                        <div class="alert alert-info" role="alert">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-info-circle-fill fs-4 me-3"></i>
+                                <div>
+                                    <h5 class="alert-heading mb-1">Đây là công việc của bạn</h5>
+                                    <p class="mb-0">Bạn không thể ứng tuyển vào vị trí công việc do chính mình đăng tuyển.</p>
+                                </div>
+                            </div>
+                        </div>
+                    }
                     else
                     {
                         <form asp-action="Apply" asp-controller="ApplyJob" asp-route-postId="@Model.Post.PostId" method="post" enctype="multipart/form-data">

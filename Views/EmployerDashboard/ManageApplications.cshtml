@@ -131,12 +131,35 @@
                                                     <div class="d-flex flex-column justify-content-center">
                                                         <h6 class="mb-0 text-sm">@(application.Users?.FullName ?? "Unknown")</h6>
                                                         <p class="text-xs text-secondary mb-0">@(application.Users?.Email ?? "No email")</p>
+                                                        @if (!string.IsNullOrEmpty(application.Users?.Skills))
+                                                        {
+                                                            <div class="mt-1">
+                                                                @foreach (var skill in application.Users.Skills.Split(',', StringSplitOptions.RemoveEmptyEntries).Take(3))
+                                                                {
+                                                                    <span class="badge bg-light text-dark me-1">@skill.Trim()</span>
+                                                                }
+                                                                @if (application.Users.Skills.Split(',', StringSplitOptions.RemoveEmptyEntries).Length > 3)
+                                                                {
+                                                                    <span class="badge bg-light text-dark">+@(application.Users.Skills.Split(',', StringSplitOptions.RemoveEmptyEntries).Length - 3)</span>
+                                                                }
+                                                            </div>
+                                                        }
                                                     </div>
                                                 </div>
                                             </td>
                                             <td>
                                                 <p class="text-xs font-weight-bold mb-0">@(application.Post?.Title ?? "Unknown")</p>
                                                 <p class="text-xs text-secondary mb-0">@(application.Post?.Position ?? "Unknown")</p>
+                                                <div class="d-flex align-items-center mt-1">
+                                                    @if (!string.IsNullOrEmpty(application.CVFileUrl))
+                                                    {
+                                                        <span class="badge bg-success me-1">CV đính kèm</span>
+                                                    }
+                                                    @if (!string.IsNullOrEmpty(application.Users?.CvFileUrl))
+                                                    {
+                                                        <span class="badge bg-info me-1">CV hồ sơ</span>
+                                                    }
+                                                </div>
                                             </td>
                                             <td class="align-middle text-center text-sm">
                                                 @{
@@ -218,11 +241,7 @@
 @section Scripts {
     <script>
         $(document).ready(function () {
-            // Khởi tạo các dropdown Bootstrap
-            var dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'))
-            var dropdownList = dropdownElementList.map(function (dropdownToggleEl) {
-                return new bootstrap.Dropdown(dropdownToggleEl)
-            });
+            // Các hàm JavaScript nếu cần
         });
     </script>
 }

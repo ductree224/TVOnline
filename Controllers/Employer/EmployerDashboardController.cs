@@ -79,7 +79,7 @@ namespace TVOnline.Controllers.Employer
                 PhoneNumber = user.PhoneNumber,
                 Description = employer.Description,
                 LogoURL = employer.LogoURL,
-                CityId = employer.CityId, // Sửa lỗi chuyển đổi kiểu dữ liệu
+                CityId = employer.CityId,
                 CityName = cityName
             };
 
@@ -127,6 +127,15 @@ namespace TVOnline.Controllers.Employer
                 InterviewedCount = allApplications.Count(cv => cv.CVStatus == "Interviewed")
             };
 
+            // Lấy danh sách các CV người dùng nổi bật
+            var employerUserIds = await _context.Employers.Select(e => e.UserId).ToListAsync();
+            var featuredUserCVs = await _userManager.Users
+                .Where(u => !string.IsNullOrEmpty(u.CvFileUrl) || !string.IsNullOrEmpty(u.Skills))
+                .Where(u => !employerUserIds.Contains(u.Id))
+                .OrderByDescending(u => u.LastCvUpdate)
+                .Take(6)
+                .ToListAsync();
+
             var viewModel = new EmployerDashboardViewModel
             {
                 Company = companyViewModel,
@@ -134,7 +143,8 @@ namespace TVOnline.Controllers.Employer
                 TotalPosts = totalPosts,
                 TotalApplications = totalApplications,
                 RecentApplications = recentApplications,
-                ApplicationStatistics = applicationStats
+                ApplicationStatistics = applicationStats,
+                FeaturedUserCVs = featuredUserCVs
             };
 
             return View(viewModel);
@@ -180,7 +190,22 @@ namespace TVOnline.Controllers.Employer
                 query = query.Where(cv => cv.CVStatus == status);
             }
 
-            var applications = await query.OrderByDescending(cv => cv.Post.CreatedAt).ToListAsync();
+            var applications = await query.OrderByDescending(cv => cv.AppliedDate).ToListAsync();
+
+            // Tải thêm thông tin chi tiết của người dùng
+            foreach (var application in applications)
+            {
+                if (application.Users != null && !string.IsNullOrEmpty(application.Users.Id))
+                {
+                    var fullUserInfo = await _userManager.FindByIdAsync(application.Users.Id);
+                    if (fullUserInfo != null)
+                    {
+                        // Cập nhật thông tin CV từ hồ sơ người dùng
+                        application.Users.CvFileUrl = fullUserInfo.CvFileUrl;
+                        application.Users.Skills = fullUserInfo.Skills;
+                    }
+                }
+            }
 
             ViewBag.StatusFilter = status;
             return View(applications);
@@ -214,13 +239,36 @@ namespace TVOnline.Controllers.Employer
                 return RedirectToAction("Register", "EmployerRegistration");
             }
 
-            // Lấy chi tiết CV
+            // Lấy chi tiết CV với thông tin đầy đủ của người dùng
             var application = await _context.UserCVs
                 .Include(cv => cv.Users)
                 .Include(cv => cv.Post)
+                    .ThenInclude(p => p.City)
                 .FirstOrDefaultAsync(cv => cv.CvID == cvId && cv.Post.EmployerId == employer.EmployerId);
 
-            return application == null ? NotFound() : View(application);
+            if (application == null)
+            {
+                return NotFound();
+            }
+
+            // Đảm bảo tất cả thông tin hồ sơ người dùng được tải đầy đủ
+            if (application.Users != null && !string.IsNullOrEmpty(application.Users.Id))
+            {
+                // Tải thêm thông tin chi tiết của người dùng nếu cần
+                var fullUserInfo = await _userManager.FindByIdAsync(application.Users.Id);
+                if (fullUserInfo != null)
+                {
+                    // Cập nhật thông tin CV từ hồ sơ người dùng
+                    application.Users.CvFileUrl = fullUserInfo.CvFileUrl;
+                    application.Users.Biography = fullUserInfo.Biography;
+                    application.Users.Skills = fullUserInfo.Skills;
+                    application.Users.WorkExperience = fullUserInfo.WorkExperience;
+                    application.Users.Education = fullUserInfo.Education;
+                    application.Users.LastCvUpdate = fullUserInfo.LastCvUpdate;
+                }
+            }
+
+            return View(application);
         }
 
         [HttpPost]
@@ -556,6 +604,114 @@ namespace TVOnline.Controllers.Employer
             ViewBag.PostId = post.PostId;
 
             return View(applications);
+        }
+
+        public async Task<IActionResult> BrowseUserCVs(string searchTerm = null, string skills = null)
+        {
+            if (!User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            // Kiểm tra quyền truy cập
+            var isEmployer = await _userManager.IsInRoleAsync(user, "Employer");
+            if (!isEmployer)
+            {
+                return RedirectToAction("Register", "EmployerRegistration");
+            }
+
+            var employer = await _context.Employers
+                .FirstOrDefaultAsync(e => e.UserId == user.Id);
+
+            if (employer == null)
+            {
+                return RedirectToAction("Register", "EmployerRegistration");
+            }
+
+            // Lấy danh sách tất cả người dùng có CV (không phải nhà tuyển dụng)
+            var query = _userManager.Users
+                .Where(u => !string.IsNullOrEmpty(u.CvFileUrl) || !string.IsNullOrEmpty(u.Skills))
+                .AsQueryable();
+
+            // Lọc theo từ khóa tìm kiếm nếu có
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                query = query.Where(u => 
+                    u.FullName.Contains(searchTerm) || 
+                    (u.Biography != null && u.Biography.Contains(searchTerm)) ||
+                    (u.Skills != null && u.Skills.Contains(searchTerm)) ||
+                    (u.WorkExperience != null && u.WorkExperience.Contains(searchTerm)) ||
+                    (u.Education != null && u.Education.Contains(searchTerm))
+                );
+            }
+
+            // Lọc theo kỹ năng nếu có
+            if (!string.IsNullOrEmpty(skills))
+            {
+                query = query.Where(u => u.Skills != null && u.Skills.Contains(skills));
+            }
+
+            // Loại trừ các tài khoản nhà tuyển dụng
+            var employerUserIds = await _context.Employers.Select(e => e.UserId).ToListAsync();
+            query = query.Where(u => !employerUserIds.Contains(u.Id));
+
+            var userCVs = await query.ToListAsync();
+
+            ViewBag.SearchTerm = searchTerm;
+            ViewBag.Skills = skills;
+
+            return View(userCVs);
+        }
+
+        public async Task<IActionResult> ViewUserCV(string userId)
+        {
+            if (!User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            // Kiểm tra quyền truy cập
+            var isEmployer = await _userManager.IsInRoleAsync(currentUser, "Employer");
+            if (!isEmployer)
+            {
+                return RedirectToAction("Register", "EmployerRegistration");
+            }
+
+            var employer = await _context.Employers
+                .FirstOrDefaultAsync(e => e.UserId == currentUser.Id);
+
+            if (employer == null)
+            {
+                return RedirectToAction("Register", "EmployerRegistration");
+            }
+
+            // Lấy thông tin chi tiết của người dùng
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            // Kiểm tra xem người dùng có phải là nhà tuyển dụng không
+            var isUserEmployer = await _userManager.IsInRoleAsync(user, "Employer");
+            if (isUserEmployer)
+            {
+                return NotFound();
+            }
+
+            return View(user);
         }
     }
 }
