@@ -44,8 +44,8 @@ public class PaymentController : Controller
                 amount: 10000,
                 description: "Thanh toán đơn hàng",
                 items: [new("Nâng cấp tài khoản", 1, 10000)],
-                returnUrl: "https://tvonline20250307004019.azurewebsites.net/Payment/success",
-                cancelUrl: "https://tvonline20250307004019.azurewebsites.net/Payment/cancel"
+                returnUrl: "https://localhost:5293//Payment/success",
+                cancelUrl: "https://localhost:5293//Payment/cancel"
             );
 
             var response = await _payOS.createPaymentLink(paymentLinkRequest);

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using TVOnline.Models;
 using TVOnline.Services;
+using TVOnline.ViewModels.Account;
 
 namespace TVOnline.Controllers.Account
 {

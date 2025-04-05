@@ -37,7 +37,6 @@ namespace TVOnline.Controllers
             var posts = await _postService.GetSeveralPosts(6);
             var locations = await _locationService.GetAllCities();
 
-            // Find admin user for chat widget
             var adminUser = await _userManager.FindByEmailAsync("admin@tvonline.com");
             if (adminUser != null)
             {

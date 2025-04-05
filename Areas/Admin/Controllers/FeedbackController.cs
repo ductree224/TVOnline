@@ -22,7 +22,6 @@ namespace TVOnline.Areas.Admin.Controllers
             _context = context;
         }
 
-        // GET: Admin/Feedback
         public async Task<IActionResult> Index()
         {
             var usersWithFeedback = await _context.Users
@@ -72,7 +71,6 @@ namespace TVOnline.Areas.Admin.Controllers
             return View(viewModel);
         }
 
-        // GET: Admin/Feedback/UserFeedbacks/5
         public async Task<IActionResult> UserFeedbacks(string id, string sortOrder, string currentFilter, string searchString, int? pageNumber)
         {
             if (string.IsNullOrEmpty(id))
@@ -143,7 +141,6 @@ namespace TVOnline.Areas.Admin.Controllers
             return View(await PaginatedList<Feedbacks>.CreateAsync(feedbacks.AsNoTracking(), pageNumber ?? 1, pageSize));
         }
 
-        // GET: Admin/Feedback/Details/5
         public async Task<IActionResult> Details(string id)
         {
             if (id == null)
@@ -164,7 +161,6 @@ namespace TVOnline.Areas.Admin.Controllers
             return View(feedback);
         }
 
-        // GET: Admin/Feedback/Delete/5
         public async Task<IActionResult> Delete(string id)
         {
             if (id == null)
@@ -185,7 +181,6 @@ namespace TVOnline.Areas.Admin.Controllers
             return View(feedback);
         }
 
-        // POST: Admin/Feedback/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
@@ -198,7 +193,6 @@ namespace TVOnline.Areas.Admin.Controllers
                 TempData["SuccessMessage"] = "Phản hồi đã được xóa thành công.";
             }
             
-            // Redirect back to the user's feedback list if we have the user ID
             if (!string.IsNullOrEmpty(feedback?.UserId))
             {
                 return RedirectToAction(nameof(UserFeedbacks), new { id = feedback.UserId });
@@ -211,7 +205,6 @@ namespace TVOnline.Areas.Admin.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // GET: Admin/Feedback/Reply/5
         public async Task<IActionResult> Reply(string id)
         {
             if (id == null)
@@ -242,7 +235,6 @@ namespace TVOnline.Areas.Admin.Controllers
             return View(model);
         }
 
-        // POST: Admin/Feedback/Reply
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Reply(FeedbackReplyViewModel model)
@@ -273,7 +265,6 @@ namespace TVOnline.Areas.Admin.Controllers
             return View(model);
         }
 
-        // GET: Admin/Feedback/Dashboard
         public async Task<IActionResult> Dashboard()
         {
             var totalFeedbacks = await _context.Feedbacks.CountAsync();

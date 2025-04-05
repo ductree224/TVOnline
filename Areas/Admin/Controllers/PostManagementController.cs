@@ -56,7 +56,6 @@ namespace TVOnline.Areas.Admin.Controllers {
                 return NotFound();
             }
 
-            // Đảo ngược trạng thái
             post.IsActive = !post.IsActive;
             post.UpdatedAt = DateTime.Now;
 

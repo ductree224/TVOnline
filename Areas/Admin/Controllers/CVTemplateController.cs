@@ -40,12 +40,10 @@ namespace TVOnline.Areas.Admin.Controllers
         {
             if (ModelState.IsValid)
             {
-                // Xử lý tải lên hình ảnh thumbnail nếu có
                 if (thumbnailImage != null && thumbnailImage.Length > 0)
                 {
                     string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images", "cv-templates");
                     
-                    // Tạo thư mục nếu chưa tồn tại
                     if (!Directory.Exists(uploadsFolder))
                     {
                         Directory.CreateDirectory(uploadsFolder);
