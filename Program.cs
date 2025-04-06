@@ -20,6 +20,7 @@ using TVOnline.Service.Vnpay;
 using TVOnline.Services;
 using Microsoft.AspNetCore.Authorization;
 using TVOnline.Areas.Premium.Authorization;
+using Microsoft.AspNetCore.HttpOverrides;
 
 namespace TVOnline {
     public class Program {
@@ -47,6 +48,12 @@ namespace TVOnline {
         }
 
         private static void ConfigureServices(IServiceCollection services, IConfiguration configuration) {
+            // Configure Azure App Service
+            services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+            });
+
             // Configure HttpClient
             services.AddHttpClient<VnPayService>();
 
@@ -118,16 +125,27 @@ namespace TVOnline {
             });
 
             // Add CORS policy
-            services.AddCors(options => {
+            services.AddCors(options =>
+            {
                 options.AddPolicy("AllowAllOrigins",
-                    builder => {
-                        builder.WithOrigins("http://localhost:5000", "http://localhost:5001", 
-                                           "https://localhost:5000", "https://localhost:5001", 
-                                           "https://localhost:7223", "http://localhost:7223",
-                                           "http://localhost:44351", "https://localhost:44351")
-                               .AllowAnyMethod()
-                               .AllowAnyHeader()
-                               .AllowCredentials();
+                    builder =>
+                    {
+                        builder.WithOrigins(
+                            "https://localhost:7216",
+                            "http://localhost:5216",
+                            "https://tvonline.azurewebsites.net",
+                            "http://localhost:5000",
+                            "http://localhost:5001",
+                            "https://localhost:5000",
+                            "https://localhost:5001",
+                            "https://localhost:7223",
+                            "http://localhost:7223",
+                            "http://localhost:44351",
+                            "https://localhost:44351"
+                        )
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials();
                     });
             });
 
@@ -175,7 +193,7 @@ namespace TVOnline {
 
             app.MapControllerRoute(
                 name: "vnpay",
-                pattern: "payment/{action=Index}/{id?}",
+                pattern: "Payment/{action=Index}/{id?}",
                 defaults: new { controller = "Payment" });
 
             // Thêm hub endpoints

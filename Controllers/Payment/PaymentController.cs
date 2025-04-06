@@ -7,7 +7,7 @@ using System.Security.Claims;
 using TVOnline.Data;
 using TVOnline.Models;
 
-[Route("Payment")]
+[Route("payment")]
 [ApiController]
 public class PaymentController : Controller
 {
@@ -72,10 +72,19 @@ public class PaymentController : Controller
             return Unauthorized("Bạn cần đăng nhập để xem lịch sử giao dịch.");
         }
 
-        // Use FromSqlRaw to get payment history
-        var sqlQuery = "SELECT * FROM Payments WHERE UserId = @UserId ORDER BY PaymentDate DESC";
+        // Sử dụng LINQ thay vì SQL trực tiếp
         var payments = await _context.Set<Payment>()
-            .FromSqlRaw(sqlQuery, new SqlParameter("@UserId", userId))
+            .Where(p => p.UserId == userId)
+            .OrderByDescending(p => p.PaymentDate)
+            .Select(p => new Payment
+            {
+                PaymentId = p.PaymentId,
+                PaymentDate = p.PaymentDate,
+                PaymentMethod = p.PaymentMethod,
+                Amount = p.Amount,
+                Status = p.Status,
+                UserId = p.UserId
+            })
             .ToListAsync();
 
         return View(payments);
@@ -140,8 +149,31 @@ public class PaymentController : Controller
                     UserId = userId
                 };
                 _context.PremiumUsers.Add(premiumUser);
-                await _context.SaveChangesAsync();
             }
+
+            // Update or create account status
+            var accountStatus = await _context.AccountStatuses
+                .FirstOrDefaultAsync(a => a.UserId == userId);
+
+            if (accountStatus == null)
+            {
+                accountStatus = new AccountStatus
+                {
+                    UserId = userId,
+                    IsPremium = true,
+                    StartDate = vietnamTime,
+                    EndDate = vietnamTime.AddYears(1) // Premium for 1 year
+                };
+                _context.AccountStatuses.Add(accountStatus);
+            }
+            else
+            {
+                accountStatus.IsPremium = true;
+                accountStatus.StartDate = vietnamTime;
+                accountStatus.EndDate = vietnamTime.AddYears(1);
+            }
+
+            await _context.SaveChangesAsync();
 
             return View("Success", payment);
         }

@@ -211,8 +211,15 @@ namespace TVOnline.Controllers.Employer
             return View(applications);
         }
 
-        public async Task<IActionResult> ApplicationDetails(string cvId)
+        [Route("[action]/{cvId?}")]
+        public async Task<IActionResult> ApplicationDetails(string? cvId, [FromQuery] string? id)
         {
+            var cvIdToUse = cvId ?? id;
+            if (string.IsNullOrEmpty(cvIdToUse))
+            {
+                return NotFound();
+            }
+
             if (!User.Identity.IsAuthenticated)
             {
                 return RedirectToAction("Login", "Account");

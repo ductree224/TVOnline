@@ -12,8 +12,8 @@ using TVOnline.ViewModels.JobsViewModel;
 
 namespace TVOnline.Controllers.ApplyJob
 {
-    [Route("[controller]")]
-    public class ApplyJobController(IUserCvService userCvService, IPostService postService, UserManager<Users> userManager, ILocationService locationService, IEmployersService employersService) : Controller
+    [Route("ApplyJob")]
+    public class ApplyJobController(IUserCvService userCvService, IPostService postService, UserManager<Users> userManager, ILocationService locationService) : Controller
     {
         private readonly IUserCvService _userCvService = userCvService;
         private readonly IPostService _postService = postService;
@@ -27,7 +27,6 @@ namespace TVOnline.Controllers.ApplyJob
         public async Task<IActionResult> Index(int page = 1)
         {
             Users? user = await _userManager.GetUserAsync(User);
-
 
             var posts = await _postService.GetAllPosts(user?.Id);
             var cities = await _locationService.GetAllCities();
@@ -91,14 +90,16 @@ namespace TVOnline.Controllers.ApplyJob
             return View("Details", jobsViewModel);
         }
 
-        [Route("[action]/{id}")]
-        public async Task<IActionResult> JobDetails(string id)
+        [Route("[action]/{id?}")]
+        public async Task<IActionResult> JobDetails(string? id, [FromQuery] string? postId)
         {
-            var post = await _postService.FindPostById(id);
-            if (post == null)
+            var postIdToUse = id ?? postId;
+            if (string.IsNullOrEmpty(postIdToUse))
             {
                 return NotFound();
             }
+
+            var post = await _postService.FindPostById(postIdToUse);
 
             bool isEmployerOfPost = false;
 
@@ -108,27 +109,16 @@ namespace TVOnline.Controllers.ApplyJob
                 var user = await _userManager.GetUserAsync(User);
                 if (user != null)
                 {
-                    // Check if user is the employer of this post
-                    var employer = await _employersService.GetEmployerByUserId(user.Id);
-                    isEmployerOfPost = employer != null && employer.EmployerId == post.EmployerId;
-                    
-                    if (isEmployerOfPost)
+                    // Check if user has already applied to this job
+                    var existingApplication = await _userCvService.GetApplicationByUserAndPost(user.Id, postIdToUse);
+                    if (existingApplication != null)
                     {
-                        ViewBag.IsEmployerOfPost = true;
+                        ViewBag.HasApplied = true;
+                        ViewBag.ApplicationStatus = existingApplication.CVStatus;
                     }
                     else
                     {
-                        // Check if user has already applied to this job
-                        var existingApplication = await _userCvService.GetApplicationByUserAndPost(user.Id, id);
-                        if (existingApplication != null)
-                        {
-                            ViewBag.HasApplied = true;
-                            ViewBag.ApplicationStatus = existingApplication.CVStatus;
-                        }
-                        else
-                        {
-                            ViewBag.HasApplied = false;
-                        }
+                        ViewBag.HasApplied = false;
                     }
                 }
             }
@@ -136,15 +126,14 @@ namespace TVOnline.Controllers.ApplyJob
             var viewModel = new ViewModels.Post.PostDetailViewModel
             {
                 Post = post,
-                CurrentUser = User.Identity.IsAuthenticated ? await _userManager.GetUserAsync(User) : null,
-                IsEmployerOfPost = isEmployerOfPost
+                CurrentUser = User.Identity.IsAuthenticated ? await _userManager.GetUserAsync(User) : null
             };
 
             return View("JobDetails", viewModel);
         }
 
         [HttpPost]
-        [Route("[action]/{postId}")]
+        [Route("[action]/{postID}")]
         [Authorize]
         public async Task<IActionResult> Apply(IFormFile cvFile, string postId)
         {
@@ -178,8 +167,14 @@ namespace TVOnline.Controllers.ApplyJob
                 return RedirectToAction("JobDetails", new { id = postId });
             }
 
-            if (cvFile is { Length: > 0 })
-            {
+                // Get post details to validate
+                var post = await _postService.FindPostById(postId);
+                if (post == null)
+                {
+                    TempData["ErrorMessage"] = "Không tìm thấy vị trí công việc.";
+                    return RedirectToAction("Index");
+                }
+
                 // Ensure uploads directory exists
                 var uploadsDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
                 if (!Directory.Exists(uploadsDir))
@@ -210,11 +205,11 @@ namespace TVOnline.Controllers.ApplyJob
                 await _userCvService.SaveCv(userCvAddRequest);
 
                 TempData["SuccessMessage"] = "Ứng tuyển thành công! Nhà tuyển dụng sẽ xem xét hồ sơ của bạn.";
-                return RedirectToAction("JobDetails", new { id = postId });
+                return RedirectToAction("JobDetails", new { postId });
             }
 
             TempData["ErrorMessage"] = "Vui lòng tải lên CV của bạn.";
-            return RedirectToAction("JobDetails", new { id = postId });
+            return RedirectToAction("JobDetails", new { postId });
         }
 
         [Authorize]
