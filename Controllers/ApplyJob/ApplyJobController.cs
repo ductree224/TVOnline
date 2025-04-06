@@ -13,8 +13,7 @@ using TVOnline.ViewModels.JobsViewModel;
 namespace TVOnline.Controllers.ApplyJob
 {
     [Route("ApplyJob")]
-    public class ApplyJobController(IUserCvService userCvService, IPostService postService, UserManager<Users> userManager, ILocationService locationService) : Controller
-    {
+    public class ApplyJobController(IUserCvService userCvService, IPostService postService, UserManager<Users> userManager, ILocationService locationService, IEmployersService employersService) : Controller {
         private readonly IUserCvService _userCvService = userCvService;
         private readonly IPostService _postService = postService;
         private readonly ILocationService _locationService = locationService;
@@ -22,10 +21,8 @@ namespace TVOnline.Controllers.ApplyJob
         private readonly IEmployersService _employersService = employersService;
 
         [HttpGet]
-        [Route("")]
         [Route("Index")]
-        public async Task<IActionResult> Index(int page = 1)
-        {
+        public async Task<IActionResult> Index(int page = 1) {
             Users? user = await _userManager.GetUserAsync(User);
 
             var posts = await _postService.GetAllPosts(user?.Id);
@@ -37,8 +34,7 @@ namespace TVOnline.Controllers.ApplyJob
 
             var pagedPosts = posts.Skip((page - 1) * pageSize).Take(pageSize).ToList();
 
-            var jobsViewModel = new JobsViewModel
-            {
+            var jobsViewModel = new JobsViewModel {
                 Posts = pagedPosts,
                 Locations = cities
             };
@@ -53,8 +49,7 @@ namespace TVOnline.Controllers.ApplyJob
         [HttpGet]
         [Route("[action]")]
         public async Task<IActionResult> Filter(string keyword, int? cityId, decimal? minSalary, decimal? maxSalary,
-            int? minExperience, int? maxExperience, int page = 1)
-        {
+            int? minExperience, int? maxExperience, int page = 1) {
             Users? user = await _userManager.GetUserAsync(User);
             var cities = await _locationService.GetAllCities();
 
@@ -70,8 +65,7 @@ namespace TVOnline.Controllers.ApplyJob
 
             int totalPages = (int)Math.Ceiling((double)totalPosts / pageSize);
 
-            var jobsViewModel = new JobsViewModel
-            {
+            var jobsViewModel = new JobsViewModel {
                 Posts = posts,
                 Locations = cities,
                 SearchKeyword = keyword,
@@ -91,11 +85,9 @@ namespace TVOnline.Controllers.ApplyJob
         }
 
         [Route("[action]/{id?}")]
-        public async Task<IActionResult> JobDetails(string? id, [FromQuery] string? postId)
-        {
+        public async Task<IActionResult> JobDetails(string? id, [FromQuery] string? postId) {
             var postIdToUse = id ?? postId;
-            if (string.IsNullOrEmpty(postIdToUse))
-            {
+            if (string.IsNullOrEmpty(postIdToUse)) {
                 return NotFound();
             }
 
@@ -104,27 +96,21 @@ namespace TVOnline.Controllers.ApplyJob
             bool isEmployerOfPost = false;
 
             // Check if user is logged in to show application status
-            if (User.Identity.IsAuthenticated)
-            {
+            if (User.Identity.IsAuthenticated) {
                 var user = await _userManager.GetUserAsync(User);
-                if (user != null)
-                {
+                if (user != null) {
                     // Check if user has already applied to this job
                     var existingApplication = await _userCvService.GetApplicationByUserAndPost(user.Id, postIdToUse);
-                    if (existingApplication != null)
-                    {
+                    if (existingApplication != null) {
                         ViewBag.HasApplied = true;
                         ViewBag.ApplicationStatus = existingApplication.CVStatus;
-                    }
-                    else
-                    {
+                    } else {
                         ViewBag.HasApplied = false;
                     }
                 }
             }
 
-            var viewModel = new ViewModels.Post.PostDetailViewModel
-            {
+            var viewModel = new ViewModels.Post.PostDetailViewModel {
                 Post = post,
                 CurrentUser = User.Identity.IsAuthenticated ? await _userManager.GetUserAsync(User) : null
             };
@@ -135,90 +121,70 @@ namespace TVOnline.Controllers.ApplyJob
         [HttpPost]
         [Route("[action]/{postID}")]
         [Authorize]
-        public async Task<IActionResult> Apply(IFormFile cvFile, string postId)
-        {
+        public async Task<IActionResult> Apply(IFormFile cvFile, string postId) {
             var user = await _userManager.GetUserAsync(User);
-            if (user == null)
-            {
+            if (user == null) {
                 TempData["ErrorMessage"] = "Bạn cần đăng nhập để ứng tuyển.";
                 return RedirectToAction("JobDetails", new { id = postId });
             }
 
             // Check if user is the employer of this post
             var post = await _postService.FindPostById(postId);
-            if (post == null)
-            {
+            if (post == null) {
                 TempData["ErrorMessage"] = "Không tìm thấy vị trí công việc.";
                 return RedirectToAction("Index");
             }
 
             var employer = await _employersService.GetEmployerByUserId(user.Id);
-            if (employer != null && employer.EmployerId == post.EmployerId)
-            {
+            if (employer != null && employer.EmployerId == post.EmployerId) {
                 TempData["ErrorMessage"] = "Bạn không thể ứng tuyển vào vị trí công việc của chính mình.";
                 return RedirectToAction("JobDetails", new { id = postId });
             }
 
             // Check if user has already applied to this job
             var existingApplication = await _userCvService.GetApplicationByUserAndPost(user.Id, postId);
-            if (existingApplication != null)
-            {
+            if (existingApplication != null) {
                 TempData["ErrorMessage"] = "Bạn đã ứng tuyển vào vị trí này rồi.";
                 return RedirectToAction("JobDetails", new { id = postId });
             }
 
-                // Get post details to validate
-                var post = await _postService.FindPostById(postId);
-                if (post == null)
-                {
-                    TempData["ErrorMessage"] = "Không tìm thấy vị trí công việc.";
-                    return RedirectToAction("Index");
-                }
-
-                // Ensure uploads directory exists
-                var uploadsDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
-                if (!Directory.Exists(uploadsDir))
-                {
-                    Directory.CreateDirectory(uploadsDir);
-                }
-
-                // Create a unique filename to prevent overwriting
-                var fileName = $"{user.Id}_{DateTime.Now:yyyyMMddHHmmss}_{Path.GetFileName(cvFile.FileName)}";
-                var filePath = Path.Combine(uploadsDir, fileName);
-
-                await using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await cvFile.CopyToAsync(stream);
-                }
-
-                // Lưu thông tin ứng tuyển vào cơ sở dữ liệu
-                var userCvAddRequest = new UserCvAddRequest()
-                {
-                    CvId = Guid.NewGuid().ToString(),
-                    CvFileUrl = fileName,
-                    CvStatus = "Applied", // Trạng thái mặc định khi mới nộp
-                    UserId = user.Id,
-                    PostId = postId,
-                    ApplicationDate = DateTime.Now
-                };
-
-                await _userCvService.SaveCv(userCvAddRequest);
-
-                TempData["SuccessMessage"] = "Ứng tuyển thành công! Nhà tuyển dụng sẽ xem xét hồ sơ của bạn.";
-                return RedirectToAction("JobDetails", new { postId });
+            // Ensure uploads directory exists
+            var uploadsDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
+            if (!Directory.Exists(uploadsDir)) {
+                Directory.CreateDirectory(uploadsDir);
             }
 
-            TempData["ErrorMessage"] = "Vui lòng tải lên CV của bạn.";
+            // Create a unique filename to prevent overwriting
+            var fileName = $"{user.Id}_{DateTime.Now:yyyyMMddHHmmss}_{Path.GetFileName(cvFile.FileName)}";
+            var filePath = Path.Combine(uploadsDir, fileName);
+
+            await using (var stream = new FileStream(filePath, FileMode.Create)) {
+                await cvFile.CopyToAsync(stream);
+            }
+
+            // Lưu thông tin ứng tuyển vào cơ sở dữ liệu
+            var userCvAddRequest = new UserCvAddRequest() {
+                CvId = Guid.NewGuid().ToString(),
+                CvFileUrl = fileName,
+                CvStatus = "Applied", // Trạng thái mặc định khi mới nộp
+                UserId = user.Id,
+                PostId = postId,
+                ApplicationDate = DateTime.Now
+            };
+
+            await _userCvService.SaveCv(userCvAddRequest);
+
+            TempData["SuccessMessage"] = "Ứng tuyển thành công! Nhà tuyển dụng sẽ xem xét hồ sơ của bạn.";
             return RedirectToAction("JobDetails", new { postId });
         }
 
+
+
         [Authorize]
         [Route("[action]")]
-        public async Task<IActionResult> MyApplications()
-        {
+        public async Task<IActionResult> MyApplications() {
             var user = await _userManager.GetUserAsync(User);
-            if (user == null)
-            {
+            if (user == null) {
                 return RedirectToAction("Login", "Account");
             }
 
@@ -229,24 +195,20 @@ namespace TVOnline.Controllers.ApplyJob
         [HttpPost]
         [Route("[action]/{postId}")] // Route for saving a job, now in ApplyJobController (e.g., /ApplyJob/SaveJob/POST001)
         public async Task<IActionResult> SaveJob(string postId, int returnPage = 1, string keyword = null, int? cityId = null,
-            decimal? minSalary = null, decimal? maxSalary = null, int? minExperience = null, int? maxExperience = null)
-        {
-            if (string.IsNullOrEmpty(postId))
-            {
+            decimal? minSalary = null, decimal? maxSalary = null, int? minExperience = null, int? maxExperience = null) {
+            if (string.IsNullOrEmpty(postId)) {
                 return BadRequest("Post ID is required.");
             }
 
             // Check if user is authenticated
-            if (!User.Identity.IsAuthenticated)
-            {
+            if (!User.Identity.IsAuthenticated) {
                 // Store the post ID in TempData to potentially use it after login
                 TempData["PostToSave"] = postId;
                 return RedirectToAction("Login", "Account");
             }
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userId))
-            {
+            if (string.IsNullOrEmpty(userId)) {
                 return RedirectToAction("Login", "Account");
             }
 
@@ -254,10 +216,8 @@ namespace TVOnline.Controllers.ApplyJob
 
             // Redirect based on whether we have filter parameters
             if (!string.IsNullOrEmpty(keyword) || cityId.HasValue || minSalary.HasValue ||
-                maxSalary.HasValue || minExperience.HasValue || maxExperience.HasValue)
-            {
-                return RedirectToAction("Filter", new
-                {
+                maxSalary.HasValue || minExperience.HasValue || maxExperience.HasValue) {
+                return RedirectToAction("Filter", new {
                     keyword,
                     cityId,
                     minSalary,
@@ -274,22 +234,18 @@ namespace TVOnline.Controllers.ApplyJob
         [HttpPost]
         [Route("[action]/{postId}")]
         public async Task<IActionResult> UnsaveJob(string postId, int returnPage = 1, string keyword = null, int? cityId = null,
-            decimal? minSalary = null, decimal? maxSalary = null, int? minExperience = null, int? maxExperience = null)
-        {
-            if (string.IsNullOrEmpty(postId))
-            {
+            decimal? minSalary = null, decimal? maxSalary = null, int? minExperience = null, int? maxExperience = null) {
+            if (string.IsNullOrEmpty(postId)) {
                 return BadRequest("Post ID is required.");
             }
 
             // Check if user is authenticated
-            if (!User.Identity.IsAuthenticated)
-            {
+            if (!User.Identity.IsAuthenticated) {
                 return RedirectToAction("Login", "Account");
             }
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userId))
-            {
+            if (string.IsNullOrEmpty(userId)) {
                 return RedirectToAction("Login", "Account");
             }
 
@@ -297,10 +253,8 @@ namespace TVOnline.Controllers.ApplyJob
 
             // Redirect based on whether we have filter parameters
             if (!string.IsNullOrEmpty(keyword) || cityId.HasValue || minSalary.HasValue ||
-                maxSalary.HasValue || minExperience.HasValue || maxExperience.HasValue)
-            {
-                return RedirectToAction("Filter", new
-                {
+                maxSalary.HasValue || minExperience.HasValue || maxExperience.HasValue) {
+                return RedirectToAction("Filter", new {
                     keyword,
                     cityId,
                     minSalary,
@@ -313,5 +267,6 @@ namespace TVOnline.Controllers.ApplyJob
 
             return RedirectToAction("Index", new { page = returnPage });
         }
+    
     }
 }
