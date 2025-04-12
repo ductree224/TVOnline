@@ -11,19 +11,19 @@ namespace TVOnline.Data
         public DbSet<Employers> Employers { get; set; }
         public DbSet<Zone> Zones { get; set; }
         public DbSet<Cities> Cities { get; set; }
-        public DbSet<Job> Jobs { get; set; }
         public DbSet<Post> Posts { get; set; }
         public DbSet<Feedbacks> Feedbacks { get; set; }
-        public DbSet<InterviewInvitation> InterviewInvitations { get; set; }
         public DbSet<UserCV> UserCVs { get; set; }
         public DbSet<Payment> Payments { get; set; }
         public DbSet<PremiumUser> PremiumUsers { get; set; }
-        public DbSet<Template> Templates { get; set; }
         public DbSet<SavedJob> SavedJobs { get; set; }
         public DbSet<CVTemplate> CVTemplates { get; set; }
         public DbSet<AccountStatus> AccountStatuses { get; set; }
         public DbSet<ChatMessage> ChatMessages { get; set; }
         public DbSet<PremiumUserCV> PremiumUserCVs { get; set; }
+        public DbSet<EmployerRegistrationRequest> EmployerRegistrationRequests { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
+
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
@@ -80,10 +80,6 @@ namespace TVOnline.Data
                 .Property(z => z.ZoneName)
                 .IsRequired();
 
-            modelBuilder.Entity<Job>()
-                .Property(j => j.JobName)
-                .IsRequired();
-
             // Employer properties
             modelBuilder.Entity<Employers>()
                 .Property(e => e.CompanyName)
@@ -102,10 +98,7 @@ namespace TVOnline.Data
                 .IsRequired();
 
             // cấu hình cho các khóa chính là string
-            modelBuilder.Entity<Job>()
-                .Property(j => j.JobId)
-                .ValueGeneratedOnAdd()
-                .HasDefaultValueSql("NEWID()");
+
 
             modelBuilder.Entity<Cities>()
                 .Property(c => c.CityId)
@@ -124,10 +117,7 @@ namespace TVOnline.Data
                 .ValueGeneratedOnAdd()
                 .HasDefaultValueSql("NEWID()");
 
-            modelBuilder.Entity<InterviewInvitation>()
-                .Property(i => i.InvitationId)
-                .ValueGeneratedOnAdd()
-                .HasDefaultValueSql("NEWID()");
+
 
             modelBuilder.Entity<UserCV>()
                 .Property(cv => cv.CvID)
@@ -150,10 +140,7 @@ namespace TVOnline.Data
                 .Property(pu => pu.PremiumUserId)
                 .ValueGeneratedOnAdd();
 
-            modelBuilder.Entity<Template>()
-                .Property(t => t.TemplateId)
-                .ValueGeneratedOnAdd()
-                .HasDefaultValueSql("NEWID()");
+
         }
     }
 }
