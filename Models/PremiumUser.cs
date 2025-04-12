@@ -14,6 +14,5 @@ namespace TVOnline.Models
         public virtual Users? User { get; set; }
         public string? UserId { get; set; }
 
-        public virtual ICollection<Template>? Templates { get; set; }
     }
 }

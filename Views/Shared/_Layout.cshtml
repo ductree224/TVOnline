@@ -9,6 +9,12 @@
     {
         ViewBag.AdminId = UserManager.GetUserId(User);
     }
+    
+    // Ensure ViewData["Title"] is not null
+    if (ViewData["Title"] == null)
+    {
+        ViewData["Title"] = "Trang chủ";
+    }
 }
 
 <!DOCTYPE html>
@@ -137,7 +143,7 @@
                 </div>
             </div>
             <div class="text-center pt-4 border-top border-secondary">
-                <p class="text-dark mb-0">© @DateTime.Now.Year - TVOnline. Tất cả quyền được bảo lưu.</p>
+                <p class="text-dark mb-0"> @DateTime.Now.Year - TVOnline. Tất cả quyền được bảo lưu.</p>
             </div>
         </div>
     </footer>
@@ -200,5 +206,5 @@
         });
     </script>
     @await RenderSectionAsync("Scripts", required: false)
-    </body>
+</body>
 </html>

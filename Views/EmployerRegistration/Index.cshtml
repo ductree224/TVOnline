@@ -1,0 +1,104 @@
+@model TVOnline.ViewModels.EmployerRegistration.EmployerRegistrationViewModel
+
+@{
+    ViewData["Title"] = "Đăng ký trở thành nhà tuyển dụng";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Đăng ký trở thành nhà tuyển dụng</h3>
+                </div>
+                <div class="card-body">
+                    @if (ViewBag.RejectedRequest != null)
+                    {
+                        <div class="alert alert-warning">
+                            <h5><i class="fas fa-exclamation-triangle me-2"></i>Yêu cầu trước đây của bạn đã bị từ chối</h5>
+                            <p>Lý do: @ViewBag.RejectedRequest.AdminNotes</p>
+                            <p>Vui lòng cung cấp thông tin chính xác để yêu cầu của bạn được chấp thuận.</p>
+                        </div>
+                    }
+
+                    <p class="lead mb-4">
+                        Hãy cung cấp thông tin dưới đây để đăng ký trở thành nhà tuyển dụng trên TVOnline. 
+                        Yêu cầu của bạn sẽ được quản trị viên xem xét và phản hồi trong thời gian sớm nhất.
+                    </p>
+
+                    <form asp-action="Submit" method="post" enctype="multipart/form-data">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="CompanyName" class="form-label"></label>
+                                    <input asp-for="CompanyName" class="form-control" />
+                                    <span asp-validation-for="CompanyName" class="text-danger"></span>
+                                </div>
+
+                                <div class="form-group mb-3">
+                                    <label asp-for="Email" class="form-label"></label>
+                                    <input asp-for="Email" class="form-control" />
+                                    <span asp-validation-for="Email" class="text-danger"></span>
+                                </div>
+
+                                <div class="form-group mb-3">
+                                    <label asp-for="Field" class="form-label"></label>
+                                    <input asp-for="Field" class="form-control" placeholder="VD: Công nghệ thông tin, Tài chính, Giáo dục..." />
+                                    <span asp-validation-for="Field" class="text-danger"></span>
+                                </div>
+
+                                <div class="form-group mb-3">
+                                    <label asp-for="CityId" class="form-label"></label>
+                                    <select asp-for="CityId" asp-items="ViewBag.Cities" class="form-select">
+                                        <option value="">-- Chọn thành phố --</option>
+                                    </select>
+                                    <span asp-validation-for="CityId" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="Website" class="form-label"></label>
+                                    <input asp-for="Website" class="form-control" placeholder="https://example.com" />
+                                    <span asp-validation-for="Website" class="text-danger"></span>
+                                </div>
+
+                                <div class="form-group mb-3">
+                                    <label asp-for="Logo" class="form-label"></label>
+                                    <input asp-for="Logo" type="file" class="form-control" accept="image/*" />
+                                    <small class="form-text text-muted">Tải lên logo công ty của bạn (định dạng JPG, PNG)</small>
+                                </div>
+
+                                <div class="form-group mb-3">
+                                    <label asp-for="Description" class="form-label"></label>
+                                    <textarea asp-for="Description" class="form-control" rows="5" placeholder="Mô tả về công ty của bạn..."></textarea>
+                                    <span asp-validation-for="Description" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Lưu ý: Thông tin của bạn sẽ được kiểm duyệt bởi quản trị viên. Vui lòng cung cấp thông tin chính xác để quá trình xét duyệt diễn ra nhanh chóng.
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Quay lại
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane me-2"></i>Gửi yêu cầu
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

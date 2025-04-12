@@ -1,0 +1,75 @@
+@model TVOnline.ViewModels.Notification.NotificationsViewModel
+
+<div class="dropdown-menu dropdown-menu-end notification-dropdown p-0" aria-labelledby="notificationDropdown">
+    <div class="notification-header d-flex justify-content-between align-items-center p-3 bg-primary text-white">
+        <h6 class="mb-0">Thông báo</h6>
+        <span class="badge bg-light text-primary">@Model.UnreadCount chưa đọc</span>
+    </div>
+    
+    @if (!Model.Notifications.Any())
+    {
+        <div class="text-center p-4">
+            <i class="fas fa-bell-slash fa-2x text-muted mb-3"></i>
+            <p class="mb-0">Không có thông báo nào</p>
+        </div>
+    }
+    else
+    {
+        <div class="notification-list" style="max-height: 300px; overflow-y: auto;">
+            @foreach (var notification in Model.Notifications)
+            {
+                <a href="@(string.IsNullOrEmpty(notification.Link) ? "#" : notification.Link)" 
+                   class="dropdown-item notification-item p-3 @(!notification.IsRead ? "unread" : "")"
+                   data-id="@notification.Id">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <h6 class="mb-0">@notification.Title</h6>
+                        <small class="text-muted">@notification.CreatedAt.ToString("HH:mm")</small>
+                    </div>
+                    <p class="mb-0 text-muted small">@notification.Message</p>
+                </a>
+                <div class="dropdown-divider m-0"></div>
+            }
+        </div>
+        
+        <div class="notification-footer text-center p-2 bg-light">
+            <a asp-controller="Notification" asp-action="Index" class="text-primary small">Xem tất cả thông báo</a>
+        </div>
+    }
+</div>
+
+<style>
+    .notification-dropdown {
+        width: 320px;
+    }
+    .notification-item.unread {
+        background-color: rgba(13, 110, 253, 0.05);
+        border-left: 3px solid #0d6efd;
+    }
+    .notification-item:hover {
+        background-color: rgba(0, 0, 0, 0.03);
+    }
+</style>
+
+<script>
+    $(function () {
+        // Mark notification as read when clicked
+        $('.notification-item').click(function (e) {
+            if ($(this).attr('href') === '#') {
+                e.preventDefault();
+            }
+            
+            var notificationId = $(this).data('id');
+            var $this = $(this);
+            
+            $.ajax({
+                url: '@Url.Action("MarkAsRead", "Notification")',
+                type: 'POST',
+                data: { id: notificationId },
+                success: function () {
+                    $this.removeClass('unread');
+                    updateNotificationCount();
+                }
+            });
+        });
+    });
+</script>

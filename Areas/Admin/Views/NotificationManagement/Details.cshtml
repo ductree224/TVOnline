@@ -1,0 +1,71 @@
+@model TVOnline.Models.Notification
+
+@{
+    ViewData["Title"] = "Chi tiết thông báo";
+}
+
+<div class="container-fluid">
+    <h1 class="h3 mb-2 text-gray-800">Chi tiết thông báo</h1>
+    <p class="mb-4">Xem thông tin chi tiết của thông báo</p>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Thông tin thông báo</h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <dl class="row">
+                        <dt class="col-sm-4">ID</dt>
+                        <dd class="col-sm-8">@Model.Id</dd>
+
+                        <dt class="col-sm-4">Người nhận</dt>
+                        <dd class="col-sm-8">@Model.User?.UserName</dd>
+
+                        <dt class="col-sm-4">Tiêu đề</dt>
+                        <dd class="col-sm-8">@Model.Title</dd>
+
+                        <dt class="col-sm-4">Nội dung</dt>
+                        <dd class="col-sm-8">@Model.Message</dd>
+
+                        <dt class="col-sm-4">Liên kết</dt>
+                        <dd class="col-sm-8">
+                            @if (!string.IsNullOrEmpty(Model.Link))
+                            {
+                                <a href="@Model.Link" target="_blank">@Model.Link</a>
+                            }
+                            else
+                            {
+                                <span>Không có</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">Trạng thái</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.IsRead)
+                            {
+                                <span class="badge badge-success">Đã đọc</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-warning">Chưa đọc</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">Ngày tạo</dt>
+                        <dd class="col-sm-8">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</dd>
+                    </dl>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
+                    <i class="fas fa-edit"></i> Chỉnh sửa
+                </a>
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Quay lại
+                </a>
+            </div>
+        </div>
+    </div>
+</div> 

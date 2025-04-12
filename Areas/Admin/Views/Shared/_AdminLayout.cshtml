@@ -56,6 +56,11 @@
 					</a>
 				</li>
 				<li class="nav-item d-lg-none">
+					<a class="nav-link" href="@Url.Action("Index", "NotificationManagement", new { area = "Admin" })">
+						<i class="fas fa-bell me-2"></i>Quản lý thông báo
+					</a>
+				</li>
+				<li class="nav-item d-lg-none">
 					<a class="nav-link" href="@Url.Action("ManageUsers", "UserManagement", new { area = "Admin" })">
 						<i class="fas fa-users me-2"></i>Quản lý người dùng
 					</a>
@@ -104,6 +109,14 @@
 							@if (ViewBag.UnreadMessagesCount > 0)
 							{
 								<span class="badge badge-unread rounded-pill">@ViewBag.UnreadMessagesCount</span>
+							}
+						</a>
+						<a class="nav-link @(ViewContext.RouteData.Values["Controller"].ToString() == "NotificationManagement" ? "active" : "")" href="@Url.Action("Index", "NotificationManagement", new { area = "Admin" })">
+							<div class="sb-nav-link-icon"><i class="fas fa-bell"></i></div>
+							Quản lý thông báo
+							@if (ViewBag.PendingEmployerRequests > 0)
+							{
+								<span class="badge badge-warning rounded-pill">@ViewBag.PendingEmployerRequests</span>
 							}
 						</a>
 						<a class="nav-link @(ViewContext.RouteData.Values["Controller"].ToString() == "UserManagement" ? "active" : "")" href="@Url.Action("ManageUsers", "UserManagement", new { area = "Admin" })">

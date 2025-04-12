@@ -1,4 +1,4 @@
-@model TVOnline.Models.UserCV
+﻿@model TVOnline.Models.UserCV
 
 @{
     ViewData["Title"] = "Chi tiết hồ sơ ứng tuyển";
@@ -35,12 +35,12 @@
                                             <p class="text-sm text-secondary mb-0">@(Model.Users?.PhoneNumber ?? "No phone")</p>
                                         </div>
                                     </div>
-                                    
+
                                     <div class="mb-3">
                                         <h6 class="text-sm">Vị trí ứng tuyển</h6>
                                         <p class="text-dark font-weight-bold mb-0">@(Model.Post?.Title ?? "Unknown")</p>
                                     </div>
-                                    
+
                                     <div class="mb-3">
                                         <h6 class="text-sm">Trạng thái</h6>
                                         @{
@@ -59,7 +59,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="col-md-6">
                             <div class="card">
                                 <div class="card-header pb-0">
@@ -81,7 +81,7 @@
                                     {
                                         <p class="text-secondary mb-0">Không có file CV đính kèm</p>
                                     }
-                                    
+
                                     <div class="mt-4">
                                         <h6 class="text-sm mb-3">Cập nhật trạng thái</h6>
                                         <form method="post" action="@Url.Action("UpdateApplicationStatus")">
@@ -92,7 +92,7 @@
                                                     <option value="Reviewing" selected="@(Model.CVStatus == "Reviewing")">Đang xem xét</option>
                                                     <option value="Shortlisted" selected="@(Model.CVStatus == "Shortlisted")">Đã chọn</option>
                                                     <option value="Rejected" selected="@(Model.CVStatus == "Rejected")">Từ chối</option>
-                                 f                   <option value="Interviewed" selected="@(Model.CVStatus == "Interviewed")">Đã phỏng vấn</option>
+                                                    <option value="Interviewed" selected="@(Model.CVStatus == "Interviewed")">Đã phỏng vấn</option>
                                                 </select>
                                                 <button type="submit" class="btn btn-primary ms-2">Cập nhật</button>
                                             </div>
@@ -102,89 +102,7 @@
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Thông tin CV từ hồ sơ người dùng -->
-                    @if (!string.IsNullOrEmpty(Model.Users?.CvFileUrl) || 
-                         !string.IsNullOrEmpty(Model.Users?.Biography) || 
-                         !string.IsNullOrEmpty(Model.Users?.Skills) || 
-                         !string.IsNullOrEmpty(Model.Users?.WorkExperience) || 
-                         !string.IsNullOrEmpty(Model.Users?.Education))
-                    {
-                        <div class="row mt-4">
-                            <div class="col-12">
-                                <div class="card">
-                                    <div class="card-header pb-0">
-                                        <h6>Thông tin CV từ hồ sơ người dùng</h6>
-                                    </div>
-                                    <div class="card-body">
-                                        @if (!string.IsNullOrEmpty(Model.Users?.CvFileUrl))
-                                        {
-                                            <div class="mb-4">
-                                                <h6 class="text-sm mb-2">CV từ hồ sơ người dùng</h6>
-                                                <div class="d-flex align-items-center">
-                                                    <div class="cv-file-icon me-3">
-                                                        <i class="fas fa-file-pdf text-danger fa-2x"></i>
-                                                    </div>
-                                                    <div class="cv-file-info flex-grow-1">
-                                                        <h6 class="mb-1">@Model.Users.CvFileUrl</h6>
-                                                        <p class="text-muted small mb-0">
-                                                            Cập nhật: @(Model.Users.LastCvUpdate?.ToString("dd/MM/yyyy HH:mm") ?? "Không xác định")
-                                                        </p>
-                                                    </div>
-                                                    <div class="cv-file-actions">
-                                                        <a href="/uploads/cv/@Model.Users.CvFileUrl" target="_blank" class="btn btn-sm btn-outline-primary me-2">
-                                                            <i class="fas fa-eye me-1"></i> Xem
-                                                        </a>
-                                                        <a href="/uploads/cv/@Model.Users.CvFileUrl" download class="btn btn-sm btn-outline-info">
-                                                            <i class="fas fa-download me-1"></i> Tải xuống
-                                                        </a>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        }
-                                        
-                                        @if (!string.IsNullOrEmpty(Model.Users?.Biography))
-                                        {
-                                            <div class="mb-4">
-                                                <h6 class="text-sm mb-2">Giới thiệu bản thân</h6>
-                                                <p class="text-sm">@Model.Users.Biography</p>
-                                            </div>
-                                        }
-                                        
-                                        @if (!string.IsNullOrEmpty(Model.Users?.Skills))
-                                        {
-                                            <div class="mb-4">
-                                                <h6 class="text-sm mb-2">Kỹ năng</h6>
-                                                <div class="d-flex flex-wrap gap-2">
-                                                    @foreach (var skill in Model.Users.Skills.Split(',', StringSplitOptions.RemoveEmptyEntries))
-                                                    {
-                                                        <span class="badge bg-light text-dark">@skill.Trim()</span>
-                                                    }
-                                                </div>
-                                            </div>
-                                        }
-                                        
-                                        @if (!string.IsNullOrEmpty(Model.Users?.WorkExperience))
-                                        {
-                                            <div class="mb-4">
-                                                <h6 class="text-sm mb-2">Kinh nghiệm làm việc</h6>
-                                                <p class="text-sm">@Model.Users.WorkExperience</p>
-                                            </div>
-                                        }
-                                        
-                                        @if (!string.IsNullOrEmpty(Model.Users?.Education))
-                                        {
-                                            <div class="mb-4">
-                                                <h6 class="text-sm mb-2">Học vấn</h6>
-                                                <p class="text-sm">@Model.Users.Education</p>
-                                            </div>
-                                        }
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    }
-                    
+
                     <div class="row mt-4">
                         <div class="col-12">
                             <div class="card">
@@ -226,7 +144,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="row mt-4">
                         <div class="col-12">
                             <div class="card">

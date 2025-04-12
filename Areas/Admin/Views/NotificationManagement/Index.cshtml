@@ -1,0 +1,297 @@
+@model IEnumerable<TVOnline.Models.Notification>
+
+@{
+    ViewData["Title"] = "Quản lý thông báo";
+}
+
+<div class="container-fluid">
+    <h1 class="h3 mb-2 text-gray-800">Quản lý thông báo</h1>
+    <p class="mb-4">Xem và quản lý tất cả các thông báo trong hệ thống</p>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success mb-4">
+            <i class="fas fa-check-circle mr-2"></i> @TempData["SuccessMessage"]
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger mb-4">
+            <i class="fas fa-exclamation-circle mr-2"></i> @TempData["ErrorMessage"]
+        </div>
+    }
+
+    @if (ViewBag.PendingEmployerRequests > 0)
+    {
+        <div class="alert alert-warning mb-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <i class="fas fa-exclamation-circle mr-2"></i>
+                    <strong>Có @ViewBag.PendingEmployerRequests yêu cầu đăng ký nhà tuyển dụng đang chờ xử lý!</strong>
+                </div>
+                <a asp-action="EmployerRequests" class="btn btn-warning btn-sm">
+                    <i class="fas fa-arrow-right"></i> Xem ngay
+                </a>
+            </div>
+        </div>
+    }
+
+    <!-- Thống kê tổng quan -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Tổng số thông báo
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@ViewBag.TotalNotifications</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-bell fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Chưa đọc
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@ViewBag.UnreadNotifications</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-envelope fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Đã đọc
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@ViewBag.ReadNotifications</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-envelope-open fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">Danh sách thông báo</h6>
+            <div>
+                <a asp-action="CreateSystemNotification" class="btn btn-success btn-sm mr-2">
+                    <i class="fas fa-bullhorn"></i> Gửi thông báo hệ thống
+                </a>
+                <a asp-action="Create" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus"></i> Gửi thông báo mới
+                </a>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <form asp-action="Index" method="get" class="form-inline">
+                        <div class="form-group mb-2 mr-2">
+                            <label for="userId" class="mr-2">Người dùng:</label>
+                            <select name="userId" id="userId" class="form-control" asp-items="ViewBag.Users">
+                                <option value="">-- Tất cả người dùng --</option>
+                            </select>
+                        </div>
+                        <div class="form-group mb-2 mr-2">
+                            <label for="status" class="mr-2">Trạng thái:</label>
+                            <select name="status" id="status" class="form-control">
+                                <option value="">Tất cả</option>
+                                <option value="unread">Chưa đọc</option>
+                                <option value="read">Đã đọc</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary mb-2 mr-2">Lọc</button>
+                        <a asp-action="Index" class="btn btn-outline-secondary mb-2">Xóa bộ lọc</a>
+                    </form>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <div class="btn-group">
+                    <a href="@Url.Action("Index")" class="btn @(string.IsNullOrEmpty(ViewBag.SelectedStatus) ? "btn-primary" : "btn-outline-primary")">
+                        Tất cả (@ViewBag.TotalNotifications)
+                    </a>
+                    <a href="@Url.Action("Index", new { status = "unread", userId = ViewBag.SelectedUserId })" class="btn @(ViewBag.SelectedStatus == "unread" ? "btn-warning" : "btn-outline-warning")">
+                        Chưa đọc (@ViewBag.UnreadNotifications)
+                    </a>
+                    <a href="@Url.Action("Index", new { status = "read", userId = ViewBag.SelectedUserId })" class="btn @(ViewBag.SelectedStatus == "read" ? "btn-success" : "btn-outline-success")">
+                        Đã đọc (@ViewBag.ReadNotifications)
+                    </a>
+                </div>
+
+                @if (ViewBag.UnreadNotifications > 0)
+                {
+                    <form asp-action="MarkAllAsRead" method="post" style="display: inline-block; margin-left: 10px;">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="userId" value="@ViewBag.SelectedUserId" />
+                        <button type="submit" class="btn btn-outline-secondary" onclick="return confirm('Bạn có chắc chắn muốn đánh dấu tất cả thông báo là đã đọc?')">
+                            <i class="fas fa-check-double mr-1"></i> Đánh dấu tất cả đã đọc
+                        </button>
+                    </form>
+                }
+            </div>
+
+            @if (!Model.Any())
+            {
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle mr-2"></i> Không có thông báo nào để hiển thị.
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover" id="notificationTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Người dùng</th>
+                                <th>Tiêu đề</th>
+                                <th>Nội dung</th>
+                                <th>Trạng thái</th>
+                                <th>Ngày tạo</th>
+                                <th width="150px">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr class="@(item.IsRead ? "" : "table-warning")">
+                                    <td>@item.Id</td>
+                                    <td>
+                                        @if (item.User != null)
+                                        {
+                                            <div>
+                                                <strong>@item.User.UserName</strong>
+                                                @if (!string.IsNullOrEmpty(item.User.Email))
+                                                {
+                                                    <br /><small class="text-muted">@item.User.Email</small>
+                                                }
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">N/A</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (!item.IsRead)
+                                        {
+                                            <strong>@item.Title</strong>
+                                        }
+                                        else
+                                        {
+                                            @item.Title
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (item.Message != null && item.Message.Length > 50)
+                                        {
+                                            @(item.Message.Substring(0, 50) + "...")
+                                        }
+                                        else
+                                        {
+                                            @item.Message
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (item.IsRead)
+                                        {
+                                            <span class="badge badge-success">Đã đọc</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-warning">Chưa đọc</span>
+                                        }
+                                    </td>
+                                    <td>@item.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm" title="Chi tiết">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm" title="Sửa">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <form asp-action="Delete" asp-route-id="@item.Id" method="post" style="display: inline;">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Bạn có chắc chắn muốn xóa thông báo này?')" title="Xóa">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                            @if (!item.IsRead)
+                                            {
+                                                <form asp-action="MarkAsRead" asp-route-id="@item.Id" method="post" style="display: inline;">
+                                                    @Html.AntiForgeryToken()
+                                                    <button type="submit" class="btn btn-success btn-sm" title="Đánh dấu đã đọc">
+                                                        <i class="fas fa-check"></i>
+                                                    </button>
+                                                </form>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Lưu giá trị đã chọn trong dropdown
+            var selectedUserId = '@ViewBag.SelectedUserId';
+            var selectedStatus = '@ViewBag.SelectedStatus';
+            
+            if (selectedUserId) {
+                $('#userId').val(selectedUserId);
+            }
+            
+            if (selectedStatus) {
+                $('#status').val(selectedStatus);
+            }
+
+            // Khởi tạo DataTable với cấu hình đầy đủ
+            $('#notificationTable').DataTable({
+                "order": [[5, "desc"]], // Sắp xếp theo ngày tạo mới nhất trước
+                "pageLength": 10,
+                "lengthMenu": [[5, 10, 25, 50, -1], [5, 10, 25, 50, "Tất cả"]],
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Vietnamese.json",
+                    "emptyTable": "Không có thông báo nào để hiển thị"
+                },
+                "responsive": true,
+                "columnDefs": [
+                    { "orderable": false, "targets": 6 } // Không cho phép sắp xếp cột thao tác
+                ]
+            });
+        });
+    </script>
+} 

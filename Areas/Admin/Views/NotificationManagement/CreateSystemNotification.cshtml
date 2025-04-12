@@ -1,0 +1,70 @@
+@model TVOnline.Models.Notification
+
+@{
+    ViewData["Title"] = "Gửi thông báo hệ thống";
+}
+
+<div class="container-fluid">
+    <h1 class="h3 mb-2 text-gray-800">Gửi thông báo hệ thống</h1>
+    <p class="mb-4">Tạo một thông báo hệ thống gửi đến tất cả người dùng</p>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">
+            <i class="fas fa-check-circle mr-2"></i> @TempData["SuccessMessage"]
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">
+            <i class="fas fa-exclamation-circle mr-2"></i> @TempData["ErrorMessage"]
+        </div>
+    }
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Thông tin thông báo hệ thống</h6>
+        </div>
+        <div class="card-body">
+            <form asp-action="CreateSystemNotification">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle mr-1"></i> Thông báo này sẽ được gửi đến <strong>tất cả người dùng</strong> trong hệ thống.
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Title" class="control-label">Tiêu đề</label>
+                    <input asp-for="Title" class="form-control" required />
+                    <span asp-validation-for="Title" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Message" class="control-label">Nội dung</label>
+                    <textarea asp-for="Message" class="form-control" rows="4" required></textarea>
+                    <span asp-validation-for="Message" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Link" class="control-label">Liên kết (tùy chọn)</label>
+                    <input asp-for="Link" class="form-control" />
+                    <span asp-validation-for="Link" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-paper-plane"></i> Gửi thông báo đến tất cả người dùng
+                    </button>
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Quay lại
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+} 

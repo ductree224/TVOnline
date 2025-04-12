@@ -12,5 +12,8 @@ namespace TVOnline.Areas.Admin.Models
         public int? TotalPremiumUsers { get; set; }
         public int NewUsersThisMonth { get; set; }
         public int NewPostsThisMonth { get; set; }
+        
+        // Thông tin về yêu cầu đăng ký nhà tuyển dụng
+        public int PendingEmployerRequests { get; set; }
     }
 }

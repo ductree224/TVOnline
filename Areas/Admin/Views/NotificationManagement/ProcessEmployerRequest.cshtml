@@ -1,0 +1,151 @@
+@model TVOnline.Models.EmployerRegistrationRequest
+
+@{
+    ViewData["Title"] = "Xử lý yêu cầu nhà tuyển dụng";
+}
+
+<div class="container-fluid">
+    <h1 class="h3 mb-2 text-gray-800">Xử lý yêu cầu nhà tuyển dụng</h1>
+    <p class="mb-4">Xem chi tiết và xử lý yêu cầu đăng ký trở thành nhà tuyển dụng</p>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Thông tin yêu cầu</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <h5 class="text-muted mb-1">Người dùng</h5>
+                                <p class="font-weight-bold mb-0">@Model.User.FullName</p>
+                                <p>@Model.User.Email</p>
+                            </div>
+                            <div class="mb-3">
+                                <h5 class="text-muted mb-1">Tên công ty</h5>
+                                <p>@Model.CompanyName</p>
+                            </div>
+                            <div class="mb-3">
+                                <h5 class="text-muted mb-1">Lĩnh vực</h5>
+                                <p>@Model.Field</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <h5 class="text-muted mb-1">Email liên hệ</h5>
+                                <p>@Model.Email</p>
+                            </div>
+                            <div class="mb-3">
+                                <h5 class="text-muted mb-1">Website</h5>
+                                <p>@(string.IsNullOrEmpty(Model.Website) ? "Không có" : Model.Website)</p>
+                            </div>
+                            <div class="mb-3">
+                                <h5 class="text-muted mb-1">Thành phố</h5>
+                                <p>@(Model.City?.CityName ?? "Không xác định")</p>
+                            </div>
+                            <div class="mb-3">
+                                <h5 class="text-muted mb-1">Ngày tạo</h5>
+                                <p>@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5 class="text-muted mb-2">Mô tả công ty</h5>
+                        <div class="p-3 bg-light rounded">
+                            @Model.Description
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.LogoURL))
+                    {
+                        <div class="mb-4">
+                            <h5 class="text-muted mb-2">Logo công ty</h5>
+                            <img src="@Model.LogoURL" alt="Logo của @Model.CompanyName" class="img-fluid img-thumbnail" style="max-height: 200px;">
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Xử lý yêu cầu</h6>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info mb-4">
+                        <i class="fas fa-info-circle me-2"></i> Vui lòng xem xét thông tin yêu cầu và quyết định chấp thuận hoặc từ chối.
+                    </div>
+
+                    <div class="d-grid gap-3">
+                        <button type="button" class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#approveModal">
+                            <i class="fas fa-check-circle me-2"></i> Chấp thuận
+                        </button>
+                        <button type="button" class="btn btn-danger btn-lg" data-bs-toggle="modal" data-bs-target="#rejectModal">
+                            <i class="fas fa-times-circle me-2"></i> Từ chối
+                        </button>
+                        <a asp-action="EmployerRequests" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-2"></i> Quay lại danh sách
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Approve Modal -->
+<div class="modal fade" id="approveModal" tabindex="-1" aria-labelledby="approveModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="ApproveEmployerRequest" asp-route-id="@Model.RequestId" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="approveModalLabel">Chấp thuận yêu cầu</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Bạn có chắc chắn muốn chấp thuận yêu cầu đăng ký nhà tuyển dụng của <strong>@Model.User.FullName</strong> cho công ty <strong>@Model.CompanyName</strong>?</p>
+                    <div class="form-group">
+                        <label for="message">Nội dung thông báo:</label>
+                        <textarea name="message" id="message" class="form-control" rows="4">Yêu cầu đăng ký trở thành nhà tuyển dụng của bạn đã được chấp thuận. Bạn có thể bắt đầu đăng tin tuyển dụng ngay bây giờ.</textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-success">Chấp thuận</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Reject Modal -->
+<div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="RejectEmployerRequest" asp-route-id="@Model.RequestId" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="rejectModalLabel">Từ chối yêu cầu</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Bạn có chắc chắn muốn từ chối yêu cầu đăng ký nhà tuyển dụng của <strong>@Model.User.FullName</strong> cho công ty <strong>@Model.CompanyName</strong>?</p>
+                    <div class="form-group">
+                        <label for="message">Lý do từ chối:</label>
+                        <textarea name="message" id="message" class="form-control" rows="4">Yêu cầu đăng ký trở thành nhà tuyển dụng của bạn đã bị từ chối. Vui lòng liên hệ với quản trị viên để biết thêm chi tiết.</textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-danger">Từ chối</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+} 

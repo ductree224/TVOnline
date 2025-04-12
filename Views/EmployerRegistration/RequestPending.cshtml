@@ -1,0 +1,59 @@
+@model TVOnline.Models.EmployerRegistrationRequest
+
+@{
+    ViewData["Title"] = "Yêu cầu đang chờ xử lý";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark">
+                    <h3 class="mb-0"><i class="fas fa-clock me-2"></i>Yêu cầu đang chờ xử lý</h3>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <div class="display-1 text-warning">
+                            <i class="fas fa-hourglass-half"></i>
+                        </div>
+                        <h4 class="mt-3">Yêu cầu của bạn đang được xem xét</h4>
+                        <p class="text-muted">Yêu cầu đã được gửi vào @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <h5><i class="fas fa-info-circle me-2"></i>Thông tin yêu cầu</h5>
+                        <hr>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Công ty:</strong> @Model.CompanyName</p>
+                                <p><strong>Email:</strong> @Model.Email</p>
+                                <p><strong>Lĩnh vực:</strong> @Model.Field</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Website:</strong> @(string.IsNullOrEmpty(Model.Website) ? "Không có" : Model.Website)</p>
+                                <p><strong>Ngày đăng ký:</strong> @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
+                                <p><strong>Trạng thái:</strong> <span class="badge bg-warning text-dark">Đang chờ xử lý</span></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-light border">
+                        <h5>Quá trình xét duyệt</h5>
+                        <ol>
+                            <li class="text-success"><i class="fas fa-check-circle me-2"></i>Gửi yêu cầu đăng ký</li>
+                            <li class="fw-bold"><i class="fas fa-spinner fa-spin me-2"></i>Quản trị viên đang xem xét yêu cầu</li>
+                            <li class="text-muted"><i class="far fa-circle me-2"></i>Nhận thông báo kết quả</li>
+                        </ol>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <p>Quản trị viên sẽ xem xét yêu cầu của bạn trong thời gian sớm nhất. Vui lòng kiểm tra email thường xuyên để nhận thông báo.</p>
+                        <a asp-controller="Home" asp-action="Index" class="btn btn-primary mt-3">
+                            <i class="fas fa-home me-2"></i>Về trang chủ
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

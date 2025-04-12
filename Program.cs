@@ -82,6 +82,7 @@ namespace TVOnline {
             services.AddScoped<IEmployersService, EmployersService>();
             services.AddScoped<IPremiumUserService, PremiumUserService>();
             services.AddScoped<ICVTemplateService, CVTemplateService>();
+            services.AddScoped<INotificationService, NotificationService>();
 
             // Đăng ký ChatService
             services.AddScoped<IChatService, ChatService>();
