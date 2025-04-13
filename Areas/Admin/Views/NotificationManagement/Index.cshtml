@@ -112,9 +112,14 @@
                     <form asp-action="Index" method="get" class="form-inline">
                         <div class="form-group mb-2 mr-2">
                             <label for="userId" class="mr-2">Người dùng:</label>
-                            <select name="userId" id="userId" class="form-control" asp-items="ViewBag.Users">
+                            <input type="text" name="userId" id="userId" list="userList" class="form-control" placeholder="Nhập hoặc chọn người dùng" value="@ViewBag.SelectedUserId">
+                            <datalist id="userList">
                                 <option value="">-- Tất cả người dùng --</option>
-                            </select>
+                                @foreach (var item in ViewBag.Users)
+                                {
+                                    <option value="@item.Value">@item.Text</option>
+                                }
+                            </datalist>
                         </div>
                         <div class="form-group mb-2 mr-2">
                             <label for="status" class="mr-2">Trạng thái:</label>
@@ -267,12 +272,7 @@
     <script>
         $(document).ready(function() {
             // Lưu giá trị đã chọn trong dropdown
-            var selectedUserId = '@ViewBag.SelectedUserId';
             var selectedStatus = '@ViewBag.SelectedStatus';
-            
-            if (selectedUserId) {
-                $('#userId').val(selectedUserId);
-            }
             
             if (selectedStatus) {
                 $('#status').val(selectedStatus);

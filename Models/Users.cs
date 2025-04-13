@@ -22,6 +22,8 @@ namespace TVOnline.Models
         [InverseProperty("User")]
         public virtual PremiumUser? PremiumUser { get; set; }
 
+        [InverseProperty("User")]
+        public virtual ApplicationCvDetail? ApplicationCvDetail { get; set; }
 
         public virtual Employers? Employer { get; set; }
         public string? EmployerId { get; set; }

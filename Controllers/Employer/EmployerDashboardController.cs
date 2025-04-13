@@ -249,9 +249,10 @@ namespace TVOnline.Controllers.Employer
             // Lấy chi tiết CV với thông tin đầy đủ của người dùng
             var application = await _context.UserCVs
                 .Include(cv => cv.Users)
+                    .ThenInclude(u => u.ApplicationCvDetail)
                 .Include(cv => cv.Post)
                     .ThenInclude(p => p.City)
-                .FirstOrDefaultAsync(cv => cv.CvID == cvId && cv.Post.EmployerId == employer.EmployerId);
+                .FirstOrDefaultAsync(cv => cv.CvID == cvIdToUse && cv.Post.EmployerId == employer.EmployerId);
 
             if (application == null)
             {
@@ -719,6 +720,75 @@ namespace TVOnline.Controllers.Employer
             }
 
             return View(user);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteApplication(string cvId)
+        {
+            if (!User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            // Kiểm tra quyền truy cập
+            var isEmployer = await _userManager.IsInRoleAsync(user, "Employer");
+            if (!isEmployer)
+            {
+                return RedirectToAction("Register", "EmployerRegistration");
+            }
+
+            var employer = await _context.Employers
+                .FirstOrDefaultAsync(e => e.UserId == user.Id);
+
+            if (employer == null)
+            {
+                return RedirectToAction("Register", "EmployerRegistration");
+            }
+
+            // Tìm CV cần xóa
+            var application = await _context.UserCVs
+                .Include(cv => cv.Users)
+                .Include(cv => cv.Post)
+                .FirstOrDefaultAsync(cv => cv.CvID == cvId && cv.Post.EmployerId == employer.EmployerId);
+
+            if (application == null)
+            {
+                return NotFound();
+            }
+
+            // Chỉ cho phép xóa CV đã bị từ chối
+            if (application.CVStatus != "Rejected")
+            {
+                TempData["Error"] = "Chỉ có thể xóa hồ sơ đã bị từ chối.";
+                return RedirectToAction("ManageApplications");
+            }
+
+            // Tạo thông báo cho jobseeker
+            var notification = new Notification
+            {
+                UserId = application.UserId,
+                Title = "Hồ sơ ứng tuyển đã bị từ chối",
+                Message = $"Hồ sơ ứng tuyển của bạn cho vị trí \"{application.Post.Title}\" tại \"{employer.CompanyName}\" đã bị từ chối và đã bị xóa khỏi hệ thống.",
+                Link = "/JobSeeker/Applications",
+                IsRead = false,
+                CreatedAt = DateTime.Now
+            };
+
+            // Lưu thông báo vào database
+            _context.Notifications.Add(notification);
+
+            // Xóa CV
+            _context.UserCVs.Remove(application);
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Đã xóa hồ sơ ứng tuyển thành công và gửi thông báo đến ứng viên.";
+            return RedirectToAction("ManageApplications");
         }
     }
 }

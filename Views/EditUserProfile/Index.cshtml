@@ -5,6 +5,7 @@
     ViewData["Title"] = "Chỉnh sửa thông tin";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var hasPassword = ViewBag.HasPassword;
+    var cvDetail = ViewBag.CvDetail as ApplicationCvDetailViewModel;
 }
 
 <section class="profile-section py-5">
@@ -27,6 +28,14 @@
                     </div>
                 }
 
+                @if (!string.IsNullOrEmpty(ViewBag.CvDetailError))
+                {
+                    <div class="alert alert-danger alert-dismissible fade show rounded-4 mb-4" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i> @ViewBag.CvDetailError
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
                 <div class="card border-0 shadow-sm rounded-4 overflow-hidden fade-in-up">
                     <div class="card-header bg-primary bg-gradient py-3">
                         <h3 class="text-white mb-0">
@@ -38,6 +47,11 @@
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link active d-flex align-items-center" id="info-tab" data-bs-toggle="tab" data-bs-target="#info" type="button" role="tab">
                                     <i class="bi bi-person-fill me-2"></i> Thông tin cá nhân
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link d-flex align-items-center" id="cv-tab" data-bs-toggle="tab" data-bs-target="#cv" type="button" role="tab">
+                                    <i class="bi bi-file-earmark-person-fill me-2"></i> Thông tin bổ sung
                                 </button>
                             </li>
                             <li class="nav-item" role="presentation">
@@ -64,30 +78,29 @@
                                     <div class="row g-4">
                                         <div class="col-md-6">
                                             <div class="form-floating mb-3">
-                                                <input asp-for="Name" class="form-control" id="floatingName" placeholder="Họ và tên" />
+                                                <input type="text" id="floatingName" class="form-control" asp-for="Name" placeholder="Họ và tên" required>
                                                 <label asp-for="Name" for="floatingName">Họ và tên</label>
-                                                <span asp-validation-for="Name" class="text-danger"></span>
                                             </div>
                                             <div class="form-floating mb-3">
-                                                <input asp-for="Dob" class="form-control" id="floatingDob" type="date" placeholder="Ngày sinh" />
-                                                <label asp-for="Dob" for="floatingDob">Ngày sinh</label>
+                                                <input type="email" id="floatingEmail" class="form-control" asp-for="Email" placeholder="Email" readonly>
+                                                <label asp-for="Email" for="floatingEmail">Email</label>
                                             </div>
                                             <div class="form-floating mb-3">
-                                                <input asp-for="City" class="form-control" id="floatingCity" placeholder="Thành phố" data-val="false" />
+                                                <input type="text" id="floatingCity" class="form-control" asp-for="City" placeholder="Thành phố">
                                                 <label asp-for="City" for="floatingCity">Thành phố</label>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-floating mb-3">
-                                                <input asp-for="PhoneNumber" class="form-control" id="floatingPhone" placeholder="Số điện thoại" data-val="false" />
+                                                <input type="tel" id="floatingPhone" class="form-control" asp-for="PhoneNumber" placeholder="Số điện thoại">
                                                 <label asp-for="PhoneNumber" for="floatingPhone">Số điện thoại</label>
                                             </div>
                                             <div class="form-floating mb-3">
-                                                <input asp-for="Email" class="form-control" id="floatingEmail" placeholder="Email" readonly />
-                                                <label asp-for="Email" for="floatingEmail">Email</label>
+                                                <input type="date" id="floatingDob" class="form-control" asp-for="Dob" placeholder="Ngày sinh">
+                                                <label asp-for="Dob" for="floatingDob">Ngày sinh</label>
                                             </div>
                                             <div class="form-floating mb-3">
-                                                <input asp-for="Job" class="form-control" id="floatingJob" placeholder="Nghề nghiệp" data-val="false" />
+                                                <input type="text" id="floatingJob" class="form-control" asp-for="Job" placeholder="Nghề nghiệp">
                                                 <label asp-for="Job" for="floatingJob">Nghề nghiệp</label>
                                             </div>
                                         </div>
@@ -100,14 +113,161 @@
                                 </form>
                             </div>
 
+                            <!-- Tab Thông tin bổ sung -->
+                            <div class="tab-pane fade" id="cv" role="tabpanel" aria-labelledby="cv-tab">
+                                <div class="alert alert-info rounded-3 mb-4">
+                                    <div class="d-flex">
+                                        <div class="flex-shrink-0">
+                                            <i class="bi bi-info-circle-fill fs-4"></i>
+                                        </div>
+                                        <div class="ms-3">
+                                            <h5 class="alert-heading">Thông tin bổ sung của bạn</h5>
+                                            <p class="mb-0">Thông tin này sẽ được hiển thị cho nhà tuyển dụng khi bạn ứng tuyển vào vị trí công việc. Hãy cập nhật đầy đủ để tăng cơ hội được tuyển dụng.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <form asp-action="UpdateCvDetail" method="post">
+                                    <input type="hidden" name="UserId" value="@cvDetail.UserId" />
+                                    
+                                    <div class="card mb-4">
+                                        <div class="card-header bg-light">
+                                            <h5 class="mb-0"><i class="bi bi-mortarboard-fill me-2"></i>Học vấn</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row g-3">
+                                                <div class="col-md-6">
+                                                    <div class="form-floating mb-3">
+                                                        <input type="text" id="School" name="School" class="form-control" value="@cvDetail.School" placeholder="Trường học">
+                                                        <label for="School">Trường học</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-floating mb-3">
+                                                        <input type="text" id="Major" name="Major" class="form-control" value="@cvDetail.Major" placeholder="Chuyên ngành">
+                                                        <label for="Major">Chuyên ngành</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-floating mb-3">
+                                                        <input type="text" id="Degree" name="Degree" class="form-control" value="@cvDetail.Degree" placeholder="Bằng cấp">
+                                                        <label for="Degree">Bằng cấp</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-floating mb-3">
+                                                        <input type="number" id="GraduationYear" name="GraduationYear" class="form-control" value="@cvDetail.GraduationYear" placeholder="Năm tốt nghiệp" min="1950" max="2050">
+                                                        <label for="GraduationYear">Năm tốt nghiệp</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-12">
+                                                    <div class="form-floating mb-3">
+                                                        <textarea id="Education" name="Education" class="form-control" placeholder="Mô tả học vấn" style="height: 100px">@cvDetail.Education</textarea>
+                                                        <label for="Education">Mô tả học vấn</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="card mb-4">
+                                        <div class="card-header bg-light">
+                                            <h5 class="mb-0"><i class="bi bi-briefcase-fill me-2"></i>Kinh nghiệm làm việc</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row g-3">
+                                                <div class="col-md-6">
+                                                    <div class="form-floating mb-3">
+                                                        <input type="text" id="LastCompany" name="LastCompany" class="form-control" value="@cvDetail.LastCompany" placeholder="Công ty gần nhất">
+                                                        <label for="LastCompany">Công ty gần nhất</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-floating mb-3">
+                                                        <input type="text" id="LastPosition" name="LastPosition" class="form-control" value="@cvDetail.LastPosition" placeholder="Vị trí gần nhất">
+                                                        <label for="LastPosition">Vị trí gần nhất</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-floating mb-3">
+                                                        <input type="number" id="YearsOfExperience" name="YearsOfExperience" class="form-control" value="@cvDetail.YearsOfExperience" placeholder="Số năm kinh nghiệm" min="0" max="50">
+                                                        <label for="YearsOfExperience">Số năm kinh nghiệm</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-floating mb-3">
+                                                        <input type="number" id="ExpectedSalary" name="ExpectedSalary" class="form-control" value="@cvDetail.ExpectedSalary" placeholder="Mức lương mong muốn">
+                                                        <label for="ExpectedSalary">Mức lương mong muốn (VNĐ)</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-12">
+                                                    <div class="form-floating mb-3">
+                                                        <textarea id="WorkExperience" name="WorkExperience" class="form-control" placeholder="Mô tả kinh nghiệm làm việc" style="height: 100px">@cvDetail.WorkExperience</textarea>
+                                                        <label for="WorkExperience">Mô tả kinh nghiệm làm việc</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="card mb-4">
+                                        <div class="card-header bg-light">
+                                            <h5 class="mb-0"><i class="bi bi-tools me-2"></i>Kỹ năng & Chứng chỉ</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row g-3">
+                                                <div class="col-md-6">
+                                                    <div class="form-floating mb-3">
+                                                        <input type="text" id="PreferredJobTitle" name="PreferredJobTitle" class="form-control" value="@cvDetail.PreferredJobTitle" placeholder="Vị trí mong muốn">
+                                                        <label for="PreferredJobTitle">Vị trí mong muốn</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-floating mb-3">
+                                                        <input type="text" id="Languages" name="Languages" class="form-control" value="@cvDetail.Languages" placeholder="Ngôn ngữ">
+                                                        <label for="Languages">Ngôn ngữ (VD: Tiếng Anh, Tiếng Nhật)</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-12">
+                                                    <div class="form-floating mb-3">
+                                                        <textarea id="Skills" name="Skills" class="form-control" placeholder="Kỹ năng" style="height: 100px">@cvDetail.Skills</textarea>
+                                                        <label for="Skills">Kỹ năng (VD: Microsoft Office, Photoshop, Java)</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-12">
+                                                    <div class="form-floating mb-3">
+                                                        <textarea id="Certificates" name="Certificates" class="form-control" placeholder="Chứng chỉ" style="height: 100px">@cvDetail.Certificates</textarea>
+                                                        <label for="Certificates">Chứng chỉ (VD: TOEIC 700, AWS Certified)</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-12">
+                                                    <div class="form-floating mb-3">
+                                                        <textarea id="AdditionalInfo" name="AdditionalInfo" class="form-control" placeholder="Thông tin bổ sung" style="height: 100px">@cvDetail.AdditionalInfo</textarea>
+                                                        <label for="AdditionalInfo">Thông tin bổ sung</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="text-center mt-4">
+                                        <button type="submit" class="btn btn-primary px-5 py-2">
+                                            <i class="bi bi-save me-2"></i> Lưu thông tin CV
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+
                             <!-- Tab Đổi mật khẩu -->
                             <div class="tab-pane fade" id="password" role="tabpanel" aria-labelledby="password-tab">
                                 <div class="alert alert-info rounded-3 mb-4">
-                                    <div class="d-flex align-items-center">
-                                        <i class="bi bi-info-circle-fill fs-4 me-3"></i>
-                                        <div>
-                                            <h5 class="alert-heading mb-1">Mật khẩu mạnh sẽ giúp bảo vệ tài khoản của bạn</h5>
-                                            <p class="mb-0 small">Mật khẩu nên có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt</p>
+                                    <div class="d-flex">
+                                        <div class="flex-shrink-0">
+                                            <i class="bi bi-info-circle-fill fs-4"></i>
+                                        </div>
+                                        <div class="ms-3">
+                                            <h5 class="alert-heading">@(hasPassword ? "Đổi mật khẩu" : "Tạo mật khẩu")</h5>
+                                            <p class="mb-0">@(hasPassword ? "Mật khẩu mới phải có ít nhất 6 ký tự." : "Hãy tạo mật khẩu để bảo vệ tài khoản của bạn.")</p>
                                         </div>
                                     </div>
                                 </div>
@@ -118,7 +278,8 @@
                                             @if (hasPassword)
                                             {
                                                 <div class="form-floating mb-4">
-                                                    <input type="password" id="currentPassword" name="CurrentPassword" class="form-control" placeholder="Mật khẩu hiện tại" required />
+                                                    <input type="password" id="currentPassword" name="CurrentPassword" class="form-control" 
+                                                           placeholder="Mật khẩu hiện tại" required />
                                                     <label for="currentPassword">Mật khẩu hiện tại</label>
                                                     <div class="password-toggle position-absolute top-50 end-0 translate-middle-y me-3">
                                                         <a href="javascript:void(0)" onclick="togglePassword('currentPassword', 'currentPasswordIcon')">
@@ -192,7 +353,5 @@
                 }
             }
         });
-
-       
     </script>
 }

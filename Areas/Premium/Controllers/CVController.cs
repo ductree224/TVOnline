@@ -199,6 +199,143 @@ namespace TVOnline.Areas.Premium.Controllers
             return View(cv);
         }
 
+        // Chỉnh sửa CV
+        public async Task<IActionResult> Edit(string id)
+        {
+            if (string.IsNullOrEmpty(id))
+            {
+                return NotFound();
+            }
+
+            // Kiểm tra người dùng có quyền Premium hay không
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var isPremium = await IsPremiumUser(userId);
+
+            if (!isPremium)
+            {
+                return RedirectToAction("Index", "Home", new { area = "" });
+            }
+
+            // Lấy thông tin CV
+            var cv = await _context.PremiumUserCVs
+                .Include(c => c.Template)
+                .FirstOrDefaultAsync(c => c.Id == id);
+
+            if (cv == null || cv.UserId != userId)
+            {
+                return NotFound();
+            }
+
+            // Tạo model cho view
+            var model = new CVViewModel
+            {
+                TemplateId = cv.TemplateId,
+                TemplateName = cv.Template?.Name,
+                Title = cv.Title,
+                Content = cv.Content,
+                HtmlContent = cv.HtmlContent,
+                CssContent = cv.CssContent
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(string id, CVViewModel model)
+        {
+            if (string.IsNullOrEmpty(id))
+            {
+                return NotFound();
+            }
+
+            // Kiểm tra người dùng có quyền Premium hay không
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var isPremium = await IsPremiumUser(userId);
+
+            if (!isPremium)
+            {
+                return RedirectToAction("Index", "Home", new { area = "" });
+            }
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    // Lấy thông tin CV
+                    var cv = await _context.PremiumUserCVs.FindAsync(id);
+
+                    if (cv == null || cv.UserId != userId)
+                    {
+                        return NotFound();
+                    }
+
+                    // Cập nhật thông tin CV
+                    cv.Title = model.Title;
+                    cv.Content = model.Content;
+                    cv.UpdatedAt = DateTime.Now;
+
+                    _context.Update(cv);
+                    await _context.SaveChangesAsync();
+
+                    TempData["SuccessMessage"] = "CV đã được cập nhật thành công!";
+                    return RedirectToAction(nameof(MyCV));
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    return NotFound();
+                }
+            }
+
+            return View(model);
+        }
+
+        // Tải xuống CV
+        public async Task<IActionResult> Download(string id)
+        {
+            if (string.IsNullOrEmpty(id))
+            {
+                return NotFound();
+            }
+
+            // Kiểm tra người dùng có quyền Premium hay không
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var isPremium = await IsPremiumUser(userId);
+
+            if (!isPremium)
+            {
+                return RedirectToAction("Index", "Home", new { area = "" });
+            }
+
+            // Lấy thông tin CV
+            var cv = await _context.PremiumUserCVs.FindAsync(id);
+
+            if (cv == null || cv.UserId != userId)
+            {
+                return NotFound();
+            }
+
+            // Tạo nội dung HTML đầy đủ cho CV
+            var htmlContent = $@"
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset='utf-8'>
+                <title>{cv.Title}</title>
+                <style>
+                    {cv.CssContent}
+                </style>
+            </head>
+            <body>
+                {cv.HtmlContent}
+            </body>
+            </html>";
+
+            // Trả về file HTML để tải xuống
+            byte[] fileBytes = System.Text.Encoding.UTF8.GetBytes(htmlContent);
+            return File(fileBytes, "text/html", $"{cv.Title.Replace(" ", "_")}.html");
+        }
+
         // Xóa CV
         [HttpPost]
         [ValidateAntiForgeryToken]

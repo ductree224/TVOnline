@@ -80,6 +80,7 @@
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Vị trí ứng tuyển</th>
                                     <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Ngày nộp</th>
                                     <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Trạng thái</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Ghi chú</th>
                                     <th class="text-secondary opacity-7"></th>
                                 </tr>
                             </thead>
@@ -87,7 +88,7 @@
                                 @if (Model.Count == 0)
                                 {
                                     <tr>
-                                        <td colspan="5" class="text-center py-4">
+                                        <td colspan="6" class="text-center py-4">
                                             <p class="text-muted mb-0">Người dùng chưa nộp CV nào</p>
                                         </td>
                                     </tr>
@@ -123,6 +124,9 @@
                                                     }
                                                 }
                                                 <span class="badge @badgeClass">@(string.IsNullOrEmpty(cv.CVStatus) ? "Đang chờ" : cv.CVStatus)</span>
+                                            </td>
+                                            <td>
+                                                <p class="text-xs font-weight-bold mb-0">@(string.IsNullOrEmpty(cv.EmployerNotes) ? "-" : cv.EmployerNotes)</p>
                                             </td>
                                             <td class="align-middle">
                                                 <div class="btn-group" role="group">

@@ -105,5 +105,27 @@ namespace TVOnline.Controllers
             
             return PartialView("_NotificationsPartial", viewModel);
         }
+
+        // GET: Notification/Details/5
+        [HttpGet]
+        public async Task<IActionResult> Details(int id)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var notification = await _context.Notifications.FindAsync(id);
+            
+            if (notification == null || notification.UserId != userId)
+            {
+                TempData["ErrorMessage"] = "Thông báo không tồn tại hoặc bạn không có quyền xem thông báo này.";
+                return RedirectToAction(nameof(Index));
+            }
+            
+            // Đánh dấu thông báo là đã đọc nếu chưa đọc
+            if (!notification.IsRead)
+            {
+                await _notificationService.MarkNotificationAsReadAsync(id);
+            }
+            
+            return View(notification);
+        }
     }
 }

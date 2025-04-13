@@ -61,7 +61,7 @@
                                 </td>
                                 <td>
                                     <div class="btn-group">
-                                        <a asp-controller="EmployerDashboard" asp-action="ApplicationDetails" asp-route-id="@application.CvID" class="btn btn-sm btn-outline-primary">
+                                        <a href="@Url.Action("ApplicationDetails", "EmployerDashboard", new { cvId = application.CvID })" class="btn btn-sm btn-outline-primary">
                                             <i class="bi bi-eye"></i> Xem chi tiết
                                         </a>
                                     </div>

@@ -140,58 +140,20 @@
                             <span class="badge @badgeClass">@statusText</span>
                         </div>
                     </div>
-                </div>
-            </div>
-
-            <div class="card mb-4">
-                <div class="card-header p-3">
-                    <h6 class="mb-0">Cập nhật trạng thái</h6>
-                </div>
-                <div class="card-body p-3">
-                    <form asp-action="UpdateCVStatus" asp-controller="CVManagement" asp-area="Admin" method="post">
-                        <input type="hidden" name="cvId" value="@Model.CvID" />
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Trạng thái</label>
-                            <select name="status" class="form-select">
-                                @if (Model.CVStatus == "Pending")
-                                {
-                                    <option value="Pending" selected>Đang chờ</option>
-                                }
-                                else
-                                {
-                                    <option value="Pending">Đang chờ</option>
-                                }
-                                
-                                @if (Model.CVStatus == "Approved")
-                                {
-                                    <option value="Approved" selected>Duyệt</option>
-                                }
-                                else
-                                {
-                                    <option value="Approved">Duyệt</option>
-                                }
-                                
-                                @if (Model.CVStatus == "Rejected")
-                                {
-                                    <option value="Rejected" selected>Từ chối</option>
-                                }
-                                else
-                                {
-                                    <option value="Rejected">Từ chối</option>
-                                }
-                            </select>
+                    
+                    <div class="info-item">
+                        <div class="label">Ghi chú</div>
+                        <div class="value">
+                            @if (string.IsNullOrEmpty(Model.EmployerNotes))
+                            {
+                                <span class="text-muted">Không có ghi chú</span>
+                            }
+                            else
+                            {
+                                @Model.EmployerNotes
+                            }
                         </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Ghi chú</label>
-                            <textarea name="notes" class="form-control" rows="4">@Model.EmployerNotes</textarea>
-                        </div>
-                        
-                        <button type="submit" class="btn btn-primary w-100">
-                            <i class="fas fa-save me-1"></i> Cập nhật
-                        </button>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>

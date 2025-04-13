@@ -65,7 +65,8 @@ namespace TVOnline.Areas.Admin.Controllers
                     CVStatus = cv.CVStatus,
                     ApplicationDate = cv.ApplicationDate,
                     AppliedDate = cv.AppliedDate,
-                    PostTitle = cv.Post != null ? cv.Post.Title : "N/A"
+                    PostTitle = cv.Post != null ? cv.Post.Title : "N/A",
+                    EmployerNotes = cv.EmployerNotes
                 })
                 .ToListAsync();
 

@@ -145,8 +145,11 @@
     
     <script>
         $(document).ready(function() {
-            // Khởi tạo object để lưu dữ liệu CV
-            let cvData = {
+            // Lưu trữ nội dung HTML gốc
+            var originalHtmlContent = $("#cvHtmlContent").html();
+            
+            // Khởi tạo đối tượng dữ liệu CV
+            var cvData = {
                 personalInfo: {
                     fullName: "",
                     jobTitle: "",
@@ -177,6 +180,10 @@
             
             // Cập nhật xem trước CV
             function updatePreview() {
+                // Khôi phục nội dung HTML gốc trước khi thay thế
+                $("#cvHtmlContent").html(originalHtmlContent);
+                
+                // Lấy nội dung HTML sau khi khôi phục
                 let htmlContent = $("#cvHtmlContent").html();
                 
                 // Thay thế các biến trong mẫu CV bằng dữ liệu người dùng nhập
@@ -206,7 +213,8 @@
             });
             
             // Sự kiện khi người dùng nhấn nút cập nhật xem trước
-            $("#refreshPreviewBtn").click(function() {
+            $("#refreshPreviewBtn").click(function(e) {
+                e.preventDefault(); // Ngăn chặn hành vi mặc định của nút
                 updateJsonContent();
                 updatePreview();
             });
@@ -226,9 +234,13 @@
                 return true;
             });
             
-            // Khởi tạo ban đầu
-            updateJsonContent();
-            updatePreview();
+            // Lưu nội dung HTML gốc sau khi trang đã tải xong
+            $(window).on('load', function() {
+                originalHtmlContent = $("#cvHtmlContent").html();
+                // Khởi tạo ban đầu
+                updateJsonContent();
+                updatePreview();
+            });
         });
     </script>
 }

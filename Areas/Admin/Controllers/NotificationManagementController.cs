@@ -30,7 +30,7 @@ namespace TVOnline.Areas.Admin.Controllers
         // GET: Admin/NotificationManagement
         public async Task<IActionResult> Index(string userId = null, string status = null)
         {
-            ViewBag.Users = new SelectList(await _userManager.Users.ToListAsync(), "Id", "UserName");
+            ViewBag.Users = new SelectList(await _userManager.Users.ToListAsync(), "UserName", null);
             ViewBag.SelectedUserId = userId;
             ViewBag.SelectedStatus = status;
 
@@ -100,7 +100,7 @@ namespace TVOnline.Areas.Admin.Controllers
         // GET: Admin/NotificationManagement/Create
         public async Task<IActionResult> Create()
         {
-            ViewBag.Users = new SelectList(await _userManager.Users.ToListAsync(), "Id", "UserName");
+            ViewBag.Users = new SelectList(await _userManager.Users.ToListAsync(), "UserName", null);
             return View();
         }
 
@@ -122,7 +122,7 @@ namespace TVOnline.Areas.Admin.Controllers
                 TempData["SuccessMessage"] = "Thông báo đã được gửi thành công!";
                 return RedirectToAction(nameof(Index));
             }
-            ViewBag.Users = new SelectList(await _userManager.Users.ToListAsync(), "Id", "UserName");
+            ViewBag.Users = new SelectList(await _userManager.Users.ToListAsync(), "UserName", null);
             return View(notification);
         }
 
@@ -134,7 +134,7 @@ namespace TVOnline.Areas.Admin.Controllers
             {
                 return NotFound();
             }
-            ViewBag.Users = new SelectList(await _userManager.Users.ToListAsync(), "Id", "UserName");
+            ViewBag.Users = new SelectList(await _userManager.Users.ToListAsync(), "UserName", null);
             return View(notification);
         }
 
@@ -168,7 +168,7 @@ namespace TVOnline.Areas.Admin.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewBag.Users = new SelectList(await _userManager.Users.ToListAsync(), "Id", "UserName");
+            ViewBag.Users = new SelectList(await _userManager.Users.ToListAsync(), "UserName", null);
             return View(notification);
         }
 

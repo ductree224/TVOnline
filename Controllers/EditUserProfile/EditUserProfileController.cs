@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using TVOnline.Data;
 using TVOnline.Models;
 using TVOnline.ViewModels.UserProfile;
 
@@ -9,12 +11,15 @@ namespace TVOnline.Controllers.EditUserProfile {
     public class EditUserProfileController : Controller {
         private readonly UserManager<Users> _userManager;
         private readonly SignInManager<Users> _signInManager;
+        private readonly AppDbContext _context;
 
         public EditUserProfileController(
             UserManager<Users> userManager,
-            SignInManager<Users> signInManager) {
+            SignInManager<Users> signInManager,
+            AppDbContext context) {
             _userManager = userManager;
             _signInManager = signInManager;
+            _context = context;
         }
 
         public async Task<IActionResult> Index() {
@@ -36,6 +41,12 @@ namespace TVOnline.Controllers.EditUserProfile {
                 Job = user.UserJob,
                 Dob = user.Dob
             };
+
+            // Lấy thông tin ApplicationCvDetail nếu có
+            var cvDetail = await _context.ApplicationCvDetails
+                .FirstOrDefaultAsync(d => d.UserId == user.Id);
+            
+            ViewBag.CvDetail = cvDetail != null ? new ApplicationCvDetailViewModel(cvDetail) : new ApplicationCvDetailViewModel { UserId = user.Id };
 
             return View(model);
         }
@@ -69,6 +80,54 @@ namespace TVOnline.Controllers.EditUserProfile {
             }
             ViewBag.HasPassword = await _userManager.HasPasswordAsync(user);
             return View("Index", model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateCvDetail(ApplicationCvDetailViewModel model) {
+            if (!ModelState.IsValid) {
+                var user = await _userManager.GetUserAsync(User);
+                var profileModel = new EditUserProfileViewModel {
+                    Id = user.Id,
+                    Name = user.FullName,
+                    Email = user.Email,
+                    PhoneNumber = user.PhoneNumber,
+                    City = user.UserCity,
+                    Job = user.UserJob,
+                    Dob = user.Dob
+                };
+                ViewBag.HasPassword = await _userManager.HasPasswordAsync(user);
+                ViewBag.CvDetail = model;
+                ViewBag.CvDetailError = "Vui lòng kiểm tra lại thông tin";
+                return View("Index", profileModel);
+            }
+
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId)) {
+                return RedirectToAction("Login", "Account");
+            }
+
+            // Kiểm tra xem đã có thông tin CV chi tiết chưa
+            var existingCvDetail = await _context.ApplicationCvDetails
+                .FirstOrDefaultAsync(d => d.UserId == userId);
+
+            if (existingCvDetail == null) {
+                // Tạo mới nếu chưa có
+                var newCvDetail = model.ToModel();
+                newCvDetail.UserId = userId;
+                newCvDetail.CreatedAt = DateTime.Now;
+                
+                _context.ApplicationCvDetails.Add(newCvDetail);
+            } else {
+                // Cập nhật nếu đã có
+                existingCvDetail = model.ToModel(existingCvDetail);
+                existingCvDetail.UpdatedAt = DateTime.Now;
+                
+                _context.ApplicationCvDetails.Update(existingCvDetail);
+            }
+
+            await _context.SaveChangesAsync();
+            return RedirectToAction("Index", new { success = "Cập nhật thông tin CV thành công" });
         }
 
         [HttpPost]

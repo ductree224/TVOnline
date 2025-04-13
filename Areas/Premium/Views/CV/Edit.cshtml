@@ -1,0 +1,143 @@
+@model TVOnline.Areas.Premium.Controllers.CVViewModel
+
+@{
+    ViewData["Title"] = "Chỉnh sửa CV";
+    Layout = "~/Areas/Premium/Views/Shared/_PremiumLayout.cshtml";
+}
+
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2 class="fw-bold text-primary">Chỉnh sửa CV</h2>
+            <p class="lead text-muted">Cập nhật thông tin CV của bạn</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a asp-action="MyCV" class="btn btn-outline-primary">
+                <i class="fas fa-arrow-left me-1"></i> Quay lại
+            </a>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-3">
+        <div class="card-body p-4">
+            <form asp-action="Edit" method="post">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                <input type="hidden" asp-for="TemplateId" />
+                <input type="hidden" asp-for="HtmlContent" />
+                <input type="hidden" asp-for="CssContent" />
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="Title" class="form-label fw-bold">Tiêu đề CV</label>
+                            <input asp-for="Title" class="form-control" required />
+                            <span asp-validation-for="Title" class="text-danger"></span>
+                            <div class="form-text">Đặt tiêu đề ngắn gọn và mô tả được mục đích của CV</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Mẫu CV</label>
+                            <input type="text" class="form-control" value="@Model.TemplateName" readonly />
+                            <div class="form-text">Mẫu CV đã chọn không thể thay đổi</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Content" class="form-label fw-bold">Nội dung CV</label>
+                    <textarea asp-for="Content" class="form-control" rows="15" required></textarea>
+                    <span asp-validation-for="Content" class="text-danger"></span>
+                    <div class="form-text">
+                        Nhập thông tin chi tiết về kinh nghiệm, kỹ năng, học vấn và các thông tin khác của bạn.
+                        Định dạng nội dung theo cấu trúc rõ ràng để dễ đọc.
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <a asp-action="MyCV" class="btn btn-outline-secondary">Hủy</a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i> Lưu thay đổi
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card border-0 rounded-3 bg-light">
+                <div class="card-body p-4">
+                    <h4 class="fw-bold mb-3"><i class="fas fa-lightbulb text-warning me-2"></i> Mẹo viết CV hiệu quả</h4>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="d-flex">
+                                <div class="me-3">
+                                    <i class="fas fa-check-circle text-success fa-2x"></i>
+                                </div>
+                                <div>
+                                    <h5 class="fw-bold">Ngắn gọn và rõ ràng</h5>
+                                    <p class="text-muted">Giữ CV của bạn ngắn gọn, tập trung vào thông tin quan trọng nhất</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="d-flex">
+                                <div class="me-3">
+                                    <i class="fas fa-star text-warning fa-2x"></i>
+                                </div>
+                                <div>
+                                    <h5 class="fw-bold">Nêu bật thành tích</h5>
+                                    <p class="text-muted">Sử dụng số liệu cụ thể để minh họa cho thành tích của bạn</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="d-flex">
+                                <div class="me-3">
+                                    <i class="fas fa-bolt text-primary fa-2x"></i>
+                                </div>
+                                <div>
+                                    <h5 class="fw-bold">Tùy chỉnh cho từng công việc</h5>
+                                    <p class="text-muted">Điều chỉnh CV của bạn để phù hợp với từng vị trí ứng tuyển cụ thể</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        $(document).ready(function() {
+            // Tự động lưu nháp mỗi 30 giây
+            var autosaveInterval = setInterval(function() {
+                localStorage.setItem('cv_edit_title', $('#Title').val());
+                localStorage.setItem('cv_edit_content', $('#Content').val());
+            }, 30000);
+
+            // Kiểm tra xem có bản nháp đã lưu không
+            var savedTitle = localStorage.getItem('cv_edit_title');
+            var savedContent = localStorage.getItem('cv_edit_content');
+
+            if (savedTitle && $('#Title').val() === '') {
+                $('#Title').val(savedTitle);
+            }
+
+            if (savedContent && $('#Content').val() === '') {
+                $('#Content').val(savedContent);
+            }
+
+            // Xóa dữ liệu nháp khi form được submit thành công
+            $('form').submit(function() {
+                localStorage.removeItem('cv_edit_title');
+                localStorage.removeItem('cv_edit_content');
+                clearInterval(autosaveInterval);
+            });
+        });
+    </script>
+}

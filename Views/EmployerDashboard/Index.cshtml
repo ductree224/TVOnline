@@ -177,7 +177,7 @@
                                                 <span class="text-secondary text-xs font-weight-bold">@application.AppliedDate.ToString("dd/MM/yyyy")</span>
                                             </td>
                                             <td class="align-middle">
-                                                <a href="@Url.Action("ApplicationDetails", new { cvId = application.CvId })" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Xem chi tiết">
+                                                <a href="@Url.Action("ApplicationDetails", "EmployerDashboard", new { cvId = application.CvId })" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Xem chi tiết">
                                                     Xem chi tiết
                                                 </a>
                                             </td>

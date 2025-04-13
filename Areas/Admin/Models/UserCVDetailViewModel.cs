@@ -10,5 +10,6 @@ namespace TVOnline.Areas.Admin.Models
         public DateTime ApplicationDate { get; set; }
         public DateTime AppliedDate { get; set; }
         public string PostTitle { get; set; }
+        public string EmployerNotes { get; set; }
     }
 }

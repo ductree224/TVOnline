@@ -1,4 +1,4 @@
-﻿@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Identity
 @using Microsoft.EntityFrameworkCore
 @using TVOnline.Models
 @using TVOnline.Services
@@ -122,7 +122,7 @@
                                                 }
                                                 @if (!string.IsNullOrEmpty(notification.Link))
                                                 {
-                                                    <a href="@notification.Link" class="btn btn-sm btn-link text-decoration-none p-0">
+                                                    <a href="@Url.Action("Details", "Notification", new { id = notification.Id })" class="btn btn-sm btn-link text-decoration-none p-0">
                                                         <i class="bi bi-arrow-right-circle"></i>
                                                     </a>
                                                 }

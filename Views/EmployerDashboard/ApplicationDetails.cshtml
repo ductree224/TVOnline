@@ -1,4 +1,4 @@
-﻿@model TVOnline.Models.UserCV
+@model TVOnline.Models.UserCV
 
 @{
     ViewData["Title"] = "Chi tiết hồ sơ ứng tuyển";
@@ -33,14 +33,50 @@
                                             <h6 class="mb-0">@(Model.Users?.FullName ?? "Unknown")</h6>
                                             <p class="text-sm text-secondary mb-0">@(Model.Users?.Email ?? "No email")</p>
                                             <p class="text-sm text-secondary mb-0">@(Model.Users?.PhoneNumber ?? "No phone")</p>
+                                            @if (Model.Users?.ApplicationCvDetail != null && !string.IsNullOrEmpty(Model.Users.ApplicationCvDetail.PreferredJobTitle))
+                                            {
+                                                <p class="text-sm text-primary mb-0">@Model.Users.ApplicationCvDetail.PreferredJobTitle</p>
+                                            }
                                         </div>
                                     </div>
 
                                     <div class="mb-3">
+                                        <h6 class="text-sm">Thông tin chi tiết</h6>
+                                        @if (Model.Users?.ApplicationCvDetail?.YearsOfExperience > 0)
+                                        {
+                                            <p class="text-sm mb-1">
+                                                <i class="fas fa-briefcase me-2"></i>
+                                                @Model.Users.ApplicationCvDetail.YearsOfExperience năm kinh nghiệm
+                                            </p>
+                                        }
+                                        @if (Model.Users?.ApplicationCvDetail?.ExpectedSalary > 0)
+                                        {
+                                            <p class="text-sm mb-1">
+                                                <i class="fas fa-money-bill me-2"></i>
+                                                @* Mức lương mong muốn: @String.Format("{0:n0}", Model.Users.ApplicationCvDetail.ExpectedSalary) VNĐ *@
+                                            </p>
+                                        }
+                                        @if (Model.Users?.ApplicationCvDetail != null && !string.IsNullOrEmpty(Model.Users.ApplicationCvDetail.Languages))
+                                        {
+                                            <p class="text-sm mb-1">
+                                                <i class="fas fa-language me-2"></i>
+                                                @Model.Users.ApplicationCvDetail.Languages
+                                            </p>
+                                        }
+                                        @if (Model.Users?.ApplicationCvDetail != null && !string.IsNullOrEmpty(Model.Users.ApplicationCvDetail.Certificates))
+                                        {
+                                            <p class="text-sm mb-1">
+                                                <i class="fas fa-certificate me-2"></i>
+                                                @Model.Users.ApplicationCvDetail.Certificates
+                                            </p>
+                                        }
+                                    </div>
+                                    
+                                    <div class="mb-3">
                                         <h6 class="text-sm">Vị trí ứng tuyển</h6>
                                         <p class="text-dark font-weight-bold mb-0">@(Model.Post?.Title ?? "Unknown")</p>
                                     </div>
-
+                                    
                                     <div class="mb-3">
                                         <h6 class="text-sm">Trạng thái</h6>
                                         @{
@@ -59,7 +95,7 @@
                                 </div>
                             </div>
                         </div>
-
+                        
                         <div class="col-md-6">
                             <div class="card">
                                 <div class="card-header pb-0">
@@ -81,7 +117,7 @@
                                     {
                                         <p class="text-secondary mb-0">Không có file CV đính kèm</p>
                                     }
-
+                                    
                                     <div class="mt-4">
                                         <h6 class="text-sm mb-3">Cập nhật trạng thái</h6>
                                         <form method="post" action="@Url.Action("UpdateApplicationStatus")">
@@ -103,6 +139,91 @@
                         </div>
                     </div>
 
+                    <!-- Thông tin CV chi tiết từ ApplicationCvDetail -->
+                    @if (Model.Users?.ApplicationCvDetail != null)
+                    {
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header pb-0">
+                                        <h6>Thông tin CV chi tiết</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                @if (!string.IsNullOrEmpty(Model.Users.ApplicationCvDetail.Education))
+                                                {
+                                                    <div class="mb-4">
+                                                        <h6 class="text-sm mb-2"><i class="fas fa-graduation-cap me-2"></i>Học vấn</h6>
+                                                        <div class="p-3 bg-light rounded">
+                                                            @if (!string.IsNullOrEmpty(Model.Users.ApplicationCvDetail.School))
+                                                            {
+                                                                <p class="text-sm mb-1"><strong>Trường:</strong> @Model.Users.ApplicationCvDetail.School</p>
+                                                            }
+                                                            @if (!string.IsNullOrEmpty(Model.Users.ApplicationCvDetail.Major))
+                                                            {
+                                                                <p class="text-sm mb-1"><strong>Chuyên ngành:</strong> @Model.Users.ApplicationCvDetail.Major</p>
+                                                            }
+                                                            @if (!string.IsNullOrEmpty(Model.Users.ApplicationCvDetail.Degree))
+                                                            {
+                                                                <p class="text-sm mb-1"><strong>Bằng cấp:</strong> @Model.Users.ApplicationCvDetail.Degree</p>
+                                                            }
+                                                            @if (Model.Users.ApplicationCvDetail.GraduationYear.HasValue)
+                                                            {
+                                                                <p class="text-sm mb-1"><strong>Năm tốt nghiệp:</strong> @Model.Users.ApplicationCvDetail.GraduationYear</p>
+                                                            }
+                                                            <p class="text-sm mb-0">@Model.Users.ApplicationCvDetail.Education</p>
+                                                        </div>
+                                                    </div>
+                                                }
+                                                
+                                                @if (!string.IsNullOrEmpty(Model.Users.ApplicationCvDetail.Skills))
+                                                {
+                                                    <div class="mb-4">
+                                                        <h6 class="text-sm mb-2"><i class="fas fa-tools me-2"></i>Kỹ năng</h6>
+                                                        <div class="p-3 bg-light rounded">
+                                                            <p class="text-sm mb-0">@Model.Users.ApplicationCvDetail.Skills</p>
+                                                        </div>
+                                                    </div>
+                                                }
+                                            </div>
+                                            
+                                            <div class="col-md-6">
+                                                @if (!string.IsNullOrEmpty(Model.Users.ApplicationCvDetail.WorkExperience))
+                                                {
+                                                    <div class="mb-4">
+                                                        <h6 class="text-sm mb-2"><i class="fas fa-briefcase me-2"></i>Kinh nghiệm làm việc</h6>
+                                                        <div class="p-3 bg-light rounded">
+                                                            @if (!string.IsNullOrEmpty(Model.Users.ApplicationCvDetail.LastCompany))
+                                                            {
+                                                                <p class="text-sm mb-1"><strong>Công ty gần nhất:</strong> @Model.Users.ApplicationCvDetail.LastCompany</p>
+                                                            }
+                                                            @if (!string.IsNullOrEmpty(Model.Users.ApplicationCvDetail.LastPosition))
+                                                            {
+                                                                <p class="text-sm mb-1"><strong>Vị trí gần nhất:</strong> @Model.Users.ApplicationCvDetail.LastPosition</p>
+                                                            }
+                                                            <p class="text-sm mb-0">@Model.Users.ApplicationCvDetail.WorkExperience</p>
+                                                        </div>
+                                                    </div>
+                                                }
+                                                
+                                                @if (!string.IsNullOrEmpty(Model.Users.ApplicationCvDetail.AdditionalInfo))
+                                                {
+                                                    <div class="mb-4">
+                                                        <h6 class="text-sm mb-2"><i class="fas fa-info-circle me-2"></i>Thông tin bổ sung</h6>
+                                                        <div class="p-3 bg-light rounded">
+                                                            <p class="text-sm mb-0">@Model.Users.ApplicationCvDetail.AdditionalInfo</p>
+                                                        </div>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
                     <div class="row mt-4">
                         <div class="col-12">
                             <div class="card">
@@ -122,7 +243,7 @@
                                             </div>
                                             <div class="mb-3">
                                                 <h6 class="text-sm">Mức lương</h6>
-                                                <p class="text-dark font-weight-bold mb-0">@(Model.Post?.Salary.ToString("N0") ?? "Unknown") VNĐ</p>
+                                                <p class="text-dark font-weight-bold mb-0">@(Model.Post?.Salary != null ? String.Format("{0:n0}", Model.Post.Salary) : "Unknown") VNĐ</p>
                                             </div>
                                         </div>
                                         <div class="col-md-6">

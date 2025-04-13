@@ -12,8 +12,8 @@ using TVOnline.Data;
 namespace TVOnline.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250407032530_initial")]
-    partial class initial
+    [Migration("20250412213208_ConfigureDecimalPrecision")]
+    partial class ConfigureDecimalPrecision
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -190,6 +190,80 @@ namespace TVOnline.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("AccountStatuses");
+                });
+
+            modelBuilder.Entity("TVOnline.Models.ApplicationCvDetail", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("AdditionalInfo")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("Certificates")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Degree")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Education")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<decimal?>("ExpectedSalary")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int?>("GraduationYear")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Languages")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("LastCompany")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("LastPosition")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Major")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("PreferredJobTitle")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("School")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Skills")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("WorkExperience")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<int?>("YearsOfExperience")
+                        .HasColumnType("int");
+
+                    b.HasKey("UserId");
+
+                    b.ToTable("ApplicationCvDetails");
                 });
 
             modelBuilder.Entity("TVOnline.Models.CVTemplate", b =>
@@ -410,47 +484,6 @@ namespace TVOnline.Migrations
                     b.ToTable("Feedbacks");
                 });
 
-            modelBuilder.Entity("TVOnline.Models.InterviewInvitation", b =>
-                {
-                    b.Property<string>("InvitationId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("nvarchar(450)")
-                        .HasDefaultValueSql("NEWID()");
-
-                    b.Property<string>("EmployerId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime>("InvitationDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("InvitationId");
-
-                    b.HasIndex("EmployerId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("InterviewInvitations");
-                });
-
-            modelBuilder.Entity("TVOnline.Models.Job", b =>
-                {
-                    b.Property<string>("JobId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("nvarchar(450)")
-                        .HasDefaultValueSql("NEWID()");
-
-                    b.Property<string>("JobName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("JobId");
-
-                    b.ToTable("Jobs");
-                });
-
             modelBuilder.Entity("TVOnline.Models.Location+Cities", b =>
                 {
                     b.Property<int>("CityId")
@@ -599,6 +632,7 @@ namespace TVOnline.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("Salary")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Title")
@@ -706,29 +740,6 @@ namespace TVOnline.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("SavedJobs");
-                });
-
-            modelBuilder.Entity("TVOnline.Models.Template", b =>
-                {
-                    b.Property<string>("TemplateId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("nvarchar(450)")
-                        .HasDefaultValueSql("NEWID()");
-
-                    b.Property<string>("PremiumUserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("TemplateFileURL")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("TemplateName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("TemplateId");
-
-                    b.HasIndex("PremiumUserId");
-
-                    b.ToTable("Templates");
                 });
 
             modelBuilder.Entity("TVOnline.Models.UserCV", b =>
@@ -960,6 +971,17 @@ namespace TVOnline.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("TVOnline.Models.ApplicationCvDetail", b =>
+                {
+                    b.HasOne("TVOnline.Models.Users", "User")
+                        .WithOne("ApplicationCvDetail")
+                        .HasForeignKey("TVOnline.Models.ApplicationCvDetail", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("TVOnline.Models.EmployerRegistrationRequest", b =>
                 {
                     b.HasOne("TVOnline.Models.Location+Cities", "City")
@@ -1008,21 +1030,6 @@ namespace TVOnline.Migrations
 
                     b.HasOne("TVOnline.Models.Users", "User")
                         .WithMany("Feedbacks")
-                        .HasForeignKey("UserId");
-
-                    b.Navigation("Employer");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("TVOnline.Models.InterviewInvitation", b =>
-                {
-                    b.HasOne("TVOnline.Models.Employers", "Employer")
-                        .WithMany("InterviewInvitations")
-                        .HasForeignKey("EmployerId");
-
-                    b.HasOne("TVOnline.Models.Users", "User")
-                        .WithMany("InterviewInvitations")
                         .HasForeignKey("UserId");
 
                     b.Navigation("Employer");
@@ -1126,15 +1133,6 @@ namespace TVOnline.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("TVOnline.Models.Template", b =>
-                {
-                    b.HasOne("TVOnline.Models.PremiumUser", "PremiumUser")
-                        .WithMany("Templates")
-                        .HasForeignKey("PremiumUserId");
-
-                    b.Navigation("PremiumUser");
-                });
-
             modelBuilder.Entity("TVOnline.Models.UserCV", b =>
                 {
                     b.HasOne("TVOnline.Models.Post", "Post")
@@ -1161,8 +1159,6 @@ namespace TVOnline.Migrations
                 {
                     b.Navigation("Feedbacks");
 
-                    b.Navigation("InterviewInvitations");
-
                     b.Navigation("Posts");
                 });
 
@@ -1178,18 +1174,13 @@ namespace TVOnline.Migrations
                     b.Navigation("Employers");
                 });
 
-            modelBuilder.Entity("TVOnline.Models.PremiumUser", b =>
-                {
-                    b.Navigation("Templates");
-                });
-
             modelBuilder.Entity("TVOnline.Models.Users", b =>
                 {
+                    b.Navigation("ApplicationCvDetail");
+
                     b.Navigation("Employer");
 
                     b.Navigation("Feedbacks");
-
-                    b.Navigation("InterviewInvitations");
 
                     b.Navigation("Payments");
 

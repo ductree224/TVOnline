@@ -31,10 +31,14 @@
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                 
                 <div class="form-group">
-                    <label asp-for="UserId" class="control-label">Người nhận</label>
-                    <select asp-for="UserId" class="form-control" asp-items="ViewBag.Users" required>
-                        <option value="">-- Chọn người nhận --</option>
-                    </select>
+                    <label asp-for="User" class="control-label">Người nhận</label>
+                    <input asp-for="UserId" list="userList" class="form-control" placeholder="Nhập hoặc chọn người nhận từ danh sách" />
+                    <datalist id="userList">
+                        @foreach (var item in ViewBag.Users)
+                        {
+                            <option value="@item.Value">@item.Text</option>
+                        }
+                    </datalist>
                     <span asp-validation-for="UserId" class="text-danger"></span>
                 </div>
 
@@ -71,4 +75,15 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-} 
+    <script>
+        // Kiểm tra form trước khi submit
+        document.querySelector('form').addEventListener('submit', function(e) {
+            var userId = document.getElementById('UserId').value;
+            
+            if (!userId) {
+                e.preventDefault();
+                alert('Vui lòng chọn hoặc nhập người nhận');
+            }
+        });
+    </script>
+}

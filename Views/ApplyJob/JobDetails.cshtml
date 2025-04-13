@@ -53,9 +53,18 @@
                                 <div class="d-grid gap-2">
                                     @if (SignInManager.IsSignedIn(User))
                                     {
-                                        <a href="#apply-form" class="btn btn-primary">
-                                            <i class="bi bi-send-fill me-2"></i>Ứng tuyển ngay
-                                        </a>
+                                        @if (ViewBag.IsEmployerOfPost == true)
+                                        {
+                                            <div class="alert alert-warning">
+                                                <i class="bi bi-exclamation-triangle-fill me-2"></i>Bạn không thể ứng tuyển vào vị trí công việc của chính mình
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <a href="#apply-form" class="btn btn-primary">
+                                                <i class="bi bi-send-fill me-2"></i>Ứng tuyển ngay
+                                            </a>
+                                        }
                                     }
                                     else
                                     {
@@ -181,14 +190,33 @@
                                         <div class="form-text">Giới thiệu bản thân và lý do bạn phù hợp với vị trí này</div>
                                     </div>
                                 </div>
-                                <input type="hidden" name="postId" value="@Model.Post.PostId" />
-                                <div class="col-12">
-                                    <div class="d-grid">
-                                        <button type="submit" class="btn btn-primary py-3">
-                                            <i class="bi bi-send-fill me-2"></i>Gửi hồ sơ ứng tuyển
-                                        </button>
-                                    </div>
-                                </div>
+                                @if (SignInManager.IsSignedIn(User))
+                                {
+                                    @if (ViewBag.IsEmployerOfPost == true)
+                                    {
+                                        <div class="alert alert-warning">
+                                            <i class="bi bi-exclamation-triangle-fill me-2"></i>Bạn không thể ứng tuyển vào vị trí công việc của chính mình
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <input type="hidden" name="postId" value="@Model.Post.PostId" />
+                                        <div class="col-12">
+                                            <div class="d-grid">
+                                                <button type="submit" class="btn btn-primary py-3">
+                                                    <i class="bi bi-send-fill me-2"></i>Gửi hồ sơ ứng tuyển
+                                                </button>
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <a asp-controller="Account" asp-action="Login" class="btn btn-primary">
+                                        <i class="bi bi-box-arrow-in-right me-2"></i>Đăng nhập để ứng tuyển
+                                    </a>
+                                }
+
                             </div>
                         </form>
                         

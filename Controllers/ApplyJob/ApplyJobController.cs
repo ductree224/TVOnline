@@ -21,6 +21,7 @@ namespace TVOnline.Controllers.ApplyJob
         private readonly IEmployersService _employersService = employersService;
 
         [HttpGet]
+        [Route("")]
         [Route("Index")]
         public async Task<IActionResult> Index(int page = 1) {
             Users? user = await _userManager.GetUserAsync(User);
@@ -43,7 +44,7 @@ namespace TVOnline.Controllers.ApplyJob
             ViewBag.TotalPages = totalPages;
             ViewBag.TotalPosts = totalPosts;
 
-            return View("Details", jobsViewModel);
+            return View(jobsViewModel);
         }
 
         [HttpGet]
@@ -99,6 +100,15 @@ namespace TVOnline.Controllers.ApplyJob
             if (User.Identity.IsAuthenticated) {
                 var user = await _userManager.GetUserAsync(User);
                 if (user != null) {
+                    // Kiểm tra xem người dùng có phải là employer của công việc này không
+                    var employer = await _employersService.GetEmployerByUserId(user.Id);
+                    if (employer != null && employer.EmployerId == post.EmployerId) {
+                        isEmployerOfPost = true;
+                        ViewBag.IsEmployerOfPost = true;
+                    } else {
+                        ViewBag.IsEmployerOfPost = false;
+                    }
+
                     // Check if user has already applied to this job
                     var existingApplication = await _userCvService.GetApplicationByUserAndPost(user.Id, postIdToUse);
                     if (existingApplication != null) {
@@ -175,7 +185,7 @@ namespace TVOnline.Controllers.ApplyJob
             await _userCvService.SaveCv(userCvAddRequest);
 
             TempData["SuccessMessage"] = "Ứng tuyển thành công! Nhà tuyển dụng sẽ xem xét hồ sơ của bạn.";
-            return RedirectToAction("JobDetails", new { postId });
+            return RedirectToAction("JobDetails", new { id = postId });
         }
 
 
@@ -228,7 +238,7 @@ namespace TVOnline.Controllers.ApplyJob
                 });
             }
 
-            return RedirectToAction("Index", new { page = returnPage });
+            return RedirectToAction("Index", "ApplyJob", new { page = returnPage });
         }
 
         [HttpPost]
@@ -265,7 +275,7 @@ namespace TVOnline.Controllers.ApplyJob
                 });
             }
 
-            return RedirectToAction("Index", new { page = returnPage });
+            return RedirectToAction("Index", "ApplyJob", new { page = returnPage });
         }
     
     }

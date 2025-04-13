@@ -23,6 +23,7 @@ namespace TVOnline.Data
         public DbSet<PremiumUserCV> PremiumUserCVs { get; set; }
         public DbSet<EmployerRegistrationRequest> EmployerRegistrationRequests { get; set; }
         public DbSet<Notification> Notifications { get; set; }
+        public DbSet<ApplicationCvDetail> ApplicationCvDetails { get; set; }
 
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
@@ -140,7 +141,19 @@ namespace TVOnline.Data
                 .Property(pu => pu.PremiumUserId)
                 .ValueGeneratedOnAdd();
 
+            modelBuilder.Entity<ApplicationCvDetail>()
+                .HasOne(acd => acd.User)
+                .WithOne(u => u.ApplicationCvDetail)
+                .HasForeignKey<ApplicationCvDetail>(acd => acd.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<ApplicationCvDetail>()
+                .Property(acd => acd.ExpectedSalary)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<Post>()
+                .Property(p => p.Salary)
+                .HasPrecision(18, 2);
         }
     }
 }
